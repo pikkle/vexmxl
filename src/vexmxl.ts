@@ -9,20 +9,24 @@ class TimeDivision {
 
 	constructor(base: number) {
 		this.base = base;
-		this.table.set(base * 4, 'w');
-		this.table.set(base * 2, 'h');
-		this.table.set(base, 'q');
-		this.table.set(base / 2, '8');
-		this.table.set(base / 4, '16');
-		this.table.set(base / 8, '32');
-
+		this.table.set(base * 4,        'w');
+		this.table.set(base * 3,        'hd');
+		this.table.set(base * 2,        'h');
+		this.table.set(base * (3/2.),   'qd');
+		this.table.set(base,            'q');
+		this.table.set(base * (3/4.),   '8d');
+		this.table.set(base * (1/2.),   '8');
+		this.table.set(base * (3/8.),   '16d');
+		this.table.set(base * (1/4.),   '16');
+		this.table.set(base * (3/16.),  '32d');
+		this.table.set(base * (1/8.),   '32');
 	}
 
 	durationToTag(duration: number): string {
 		let ret: string = this.table.get(duration);
 		if (!ret) {
-			console.error("Invalid duration " + duration + " for base quarter of " + this.base);
-			throw new EvalError("duration is not valid");
+			let differences: number[] = Array.from(this.table.keys()).map(k => Math.abs(duration - k));
+			return this.durationToTag(differences.indexOf(Math.min(...differences)));
 		}
 		return ":" + ret;
 	}
@@ -52,40 +56,35 @@ export function parseXML(path: string, div: HTMLElement): void {
 
 			for (let measure of doc.measures) {
 				let measureParsed = "tabstave notation=true\n  notes ";
-				let isChord = false;
+				let streak = false;
+				let notes: string[] = [];
 				let chord: string[] = [];
-				for (let truc of measure.parts[partName]) {
-					console.log(truc);
-					if (truc.hasOwnProperty('rest')) {
-						try {
-							measureParsed += divisions.durationToTag(truc.duration) + " ## ";
-						} catch (e) {
-
-						}
-					}
-					else if (truc.hasOwnProperty('pitch')) {
-						if (truc.hasOwnProperty('chord')) {
-							isChord = true;
-							chord.push(truc.notations[0].technicals[0].fret.fret + "/" + truc.notations[0].technicals[0].string.stringNum);
+				for (let note of measure.parts[partName]) {
+					if (note.hasOwnProperty('rest')) {
+						notes.push(divisions.durationToTag(note.duration) + " ## ");
+					} else if (note.hasOwnProperty('pitch')) {
+						let tech = note.notations[0].technicals[0];
+						if (note.hasOwnProperty('chord')) {
+							streak = true;
+							chord.push(tech.fret.fret + "/" + tech.string.stringNum);
 						} else {
-							if (isChord) {
-								measureParsed += "(" + chord.join('.') + ")";
-								isChord = false;
-								chord = [];
+							if (chord.length > 0) {
+								notes.push("(" + chord.join('.') + ")");
 							}
-							try {
-								measureParsed += divisions.durationToTag(truc.duration) + " " + truc.notations[0].technicals[0].fret.fret + "/" + truc.notations[0].technicals[0].string.stringNum
-							} catch (e) {
-
-							}
+							chord = [];
+							streak = false;
+							chord.push(tech.fret.fret + "/" + tech.string.stringNum);
 						}
-
 
 					}
 
 				}
-				parsed += measureParsed + "\n";
+				if (notes.length > 0) {
+					parsed += measureParsed + notes.join(' ') + "\n";
+				}
 			}
+
+			console.log(parsed);
 
 			try {
 				vt.parse(parsed);

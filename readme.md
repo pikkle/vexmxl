@@ -14,9 +14,9 @@ Open the new folder
 ```
 cd vexmxl
 ```
-Install the packages with dev dependencies
+Install the npm packages
 ```
-npm install --only=dev
+npm install
 ```
 Compile the project with webpack
 ```
