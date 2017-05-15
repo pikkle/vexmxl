@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
     "sourceMap": true,
     "noImplicitAny": true,
     "module": "commonjs",
-    "target": "es2015",
-    "allowSyntheticDefaultImports": true
+    "target": "es2015"
   },
   "include" : [
 	"src/**/*"

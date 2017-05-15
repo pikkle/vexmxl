@@ -3,7 +3,6 @@
 // Definitions by: Loïc Serafin <https://github.com/pikkle>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-
 import Renderer = Vex.Flow.Renderer;
 declare interface ArtistOption {
 	font_face?: string;
