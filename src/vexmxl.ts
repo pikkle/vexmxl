@@ -26,9 +26,14 @@ class TimeDivision {
 		let ret: string = this.table.get(duration);
 		if (!ret) {
 			let differences: number[] = Array.from(this.table.keys()).map(k => Math.abs(duration - k));
-			return this.durationToTag(differences.indexOf(Math.min(...differences)));
+			let nearestIndex = differences.indexOf(Math.min(...differences));
+			return ":" + this.table.get(Array.from(this.table.keys())[nearestIndex]);
 		}
 		return ":" + ret;
+	}
+
+	getBase(): number {
+		return this.base;
 	}
 }
 
@@ -53,34 +58,49 @@ export function parseXML(path: string, div: HTMLElement): void {
 
 			let divisions: TimeDivision = new TimeDivision(doc.measures[0].parts[partName][1].divisions);
 
-
+			let firstStave = true;
+			let measureParsed: string;
 			for (let measure of doc.measures) {
-				let measureParsed = "tabstave notation=true\n  notes ";
+				if (firstStave) {
+					measureParsed = "tabstave notation=true\n  notes ";
+				}
+				firstStave = ! firstStave;
 				let streak = false;
 				let notes: string[] = [];
 				let chord: string[] = [];
+				let time: number = divisions.getBase();
 				for (let note of measure.parts[partName]) {
 					if (note.hasOwnProperty('rest')) {
-						notes.push(divisions.durationToTag(note.duration) + " ## ");
+						if (chord.length > 0) {
+							notes.push(divisions.durationToTag(time) + " (" + chord.join('.') + ")");
+						}
+						streak = false;
+						chord = [];
+						time = note.duration;
+						notes.push(divisions.durationToTag(time) + " ## ");
 					} else if (note.hasOwnProperty('pitch')) {
 						let tech = note.notations[0].technicals[0];
 						if (note.hasOwnProperty('chord')) {
 							streak = true;
 							chord.push(tech.fret.fret + "/" + tech.string.stringNum);
+
 						} else {
 							if (chord.length > 0) {
-								notes.push("(" + chord.join('.') + ")");
+								notes.push(divisions.durationToTag(time) + " (" + chord.join('.') + ")");
 							}
 							chord = [];
 							streak = false;
 							chord.push(tech.fret.fret + "/" + tech.string.stringNum);
 						}
-
 					}
-
+					time = note.duration;
 				}
 				if (notes.length > 0) {
-					parsed += measureParsed + notes.join(' ') + "\n";
+					if (! firstStave) {
+						measureParsed += notes.join(' ') + "|";
+					} else {
+						parsed += measureParsed + notes.join(' ') + "\n";
+					}
 				}
 			}
 
