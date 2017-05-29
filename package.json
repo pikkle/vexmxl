@@ -2,7 +2,7 @@
   "name": "vexmxl",
   "version": "1.0.0",
   "description": "MusicXML binding for VexFlow",
-  "main": "index.js",
+  "main": "build/bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,11 +14,11 @@
   ],
   "dependencies": {
     "musicxml-interfaces": "0.0.20",
-    "typescript": "^2.4.0-dev.20170529",
     "vexflow": "^1.2.83",
     "vextab": "^2.0.13"
   },
   "devDependencies": {
+    "typescript": "^2.3.3",
     "@types/vexflow": "^1.2.28",
     "awesome-typescript-loader": "^3.1.3",
     "source-map-loader": "^0.2.1"
