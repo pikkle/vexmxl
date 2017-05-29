@@ -1,0 +1,43 @@
+@startuml
+
+interface VextabRepresentable {
+    toVextab(): String
+}
+
+class Tablature implements VextabRepresentable {
+    title: String
+    tuning: String[]
+}
+
+class Measure implements VextabRepresentable {
+
+}
+
+class Time implements VextabRepresentable
+
+class Chord extends Time
+
+class Rest extends Time
+
+class Note implements VextabRepresentable {
+    fret: number;
+    string: number;
+}
+
+enum Property {
+    HAMMER_ON, PULL_OFF, SLIDE, BEND_HALF, BEND_FULL
+}
+
+enum Duration {
+    WHOLE, HALF, EIGHTH, ...
+}
+
+
+Tablature "1" -- "*" Measure
+Measure "1" -- "*" Time
+Chord "*" -- "1..6" Note
+Chord "*" -- "*" Property
+Time "*" -- "1" Duration
+
+
+@enduml

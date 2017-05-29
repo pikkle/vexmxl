@@ -54,7 +54,6 @@ typings
 .idea/
 .vscode/
 .idea/encodings.xml
-*.md
 node_modules/
 
 # Private key for GH pages deploy
