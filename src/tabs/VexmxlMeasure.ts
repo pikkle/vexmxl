@@ -1,12 +1,12 @@
 import {VextabItem} from "./VextabItem";
-import {Time} from "./Time";
+import {VexmxlTime} from "./VexmxlTime";
 
-export class Measure implements VextabItem {
-	private times: Time[] = [];
+export class VexmxlMeasure implements VextabItem {
+	private times: VexmxlTime[] = [];
 
 	constructor() {}
 
-	public addTime(time: Time): void {
+	public addTime(time: VexmxlTime): void {
 		this.times.push(time);
 	}
 

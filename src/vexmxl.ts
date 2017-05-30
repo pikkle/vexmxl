@@ -1,15 +1,28 @@
-import {parseScore, ScorePart, ScoreTimewise} from "musicxml-interfaces";
+import {Attributes, Note, parseScore, ScorePart, ScoreTimewise} from "musicxml-interfaces";
 import Renderer = Vex.Flow.Renderer;
 import RuntimeError = Vex.RuntimeError;
-import {Chord} from "./tabs/Chord";
-import {Measure} from "./tabs/Measure";
-import {Note} from "./tabs/Note";
-import {Rest} from "./tabs/Rest";
-import {Tablature} from "./tabs/Tablature";
-import {TimeSignature} from "./tabs/TimeSignature";
+import {VexmxlChord} from "./tabs/VexmxlChord";
+import {VexmxlMeasure} from "./tabs/VexmxlMeasure";
+import {VexmxlNote} from "./tabs/VexmxlNote";
+import {VexmxlRest} from "./tabs/VexmxlRest";
+import {VexmxlTablature} from "./tabs/VexmxlTablature";
 
 class ParseError extends Error {
 }
+
+let qd = 5 + 1 / 3;
+let timeMap: any = {
+	1: "w",
+	2: "h",
+	3: "hd",
+	4: "q",
+	8: "8",
+	12: "8d",
+	16: "16",
+	24: "16d",
+	32: "32",
+};
+timeMap[qd] = "qd";
 
 export function parseXML(path: string, div: HTMLElement): void {
 	fetch(path)
@@ -25,47 +38,67 @@ export function parseXML(path: string, div: HTMLElement): void {
 			let artist: Artist = new Artist(10, 10, 600, {scale: 0.8});
 			let vt: VexTab = new VexTab(artist);
 
-			let partName: string = (<ScorePart>doc.partList[0]).id; // TODO: let the part choice to the user
+			let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
 
-			let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
+			// let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
+			let bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;
 
-			let tab = new Tablature();
-
-			let time: number = timeSignature.getBase();
+			let divisions = 1; // Number of notes in measure
+			let tab = new VexmxlTablature();
 
 			for (let docMeasure of doc.measures) {
-				let measure = new Measure();
-				let chord: Chord;
+				let measure = new VexmxlMeasure();
+				let chord: VexmxlChord;
 
-				for (let note of docMeasure.parts[partName]) {
-					if (note.hasOwnProperty("rest")) {
-						if (chord && chord.notEmpty()) {
-							measure.addTime(chord);
-							chord = undefined;
-
+				for (let elem of docMeasure.parts[partName]) {
+					if (elem._class === "Attributes") {
+						let attributes = elem as Attributes;
+						if (attributes.divisions) {
+							divisions = attributes.divisions;
 						}
-						measure.addTime(new Rest(timeSignature.durationToTag(note.duration)));
 
-					} else if (note.hasOwnProperty("pitch")) {
-						let tech = note.notations[0].technicals[0];
+					} else if (elem._class === "Note") {
+						let note = elem as Note;
+						let duration = timeMap[1 / (note.duration / (divisions * 4))];
+						if (duration === undefined) {
+							console.log(1 / (note.duration / (divisions * 4)));
+							console.log(note.duration);
+						}
 
-						if (note.hasOwnProperty("chord")) {
-							if (!chord) {
-								throw new ParseError("Chord element has not been initialized properly");
-							}
-
-						} else {
+						if (note.rest) {
 							if (chord && chord.notEmpty()) {
 								measure.addTime(chord);
+								chord = undefined;
+
 							}
-							chord = new Chord(timeSignature.durationToTag(note.duration));
+
+							measure.addTime(new VexmxlRest(duration));
+
+						} else if (elem.hasOwnProperty("pitch")) {
+							let tech = note.notations[0].technicals[0];
+
+							if (note.chord) {
+								if (!chord) {
+									throw new ParseError("Chord element has not been initialized properly");
+								}
+
+							} else {
+								if (chord && chord.notEmpty()) {
+									measure.addTime(chord);
+								}
+								chord = new VexmxlChord(duration);
+							}
+							chord.addNote(new VexmxlNote(tech.fret.fret, tech.string.stringNum));
+
 						}
-						chord.addNote(new Note(tech.fret.fret, tech.string.stringNum));
 
 					}
-					time = note.duration;
 
 				}
+				if (chord && chord.notEmpty()) {
+					measure.addTime(chord);
+				}
+
 				if (measure.notEmpty()) {
 					tab.addMeasure(measure);
 
@@ -84,4 +117,4 @@ export function parseXML(path: string, div: HTMLElement): void {
 		});
 }
 
-parseXML("../test/back_in_black.xml", document.getElementById("display"));
+parseXML("../test/Back In Black2.xml", document.getElementById("display"));

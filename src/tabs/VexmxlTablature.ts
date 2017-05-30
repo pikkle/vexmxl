@@ -1,13 +1,13 @@
 import {VextabItem} from "./VextabItem";
-import {Measure} from "./Measure";
+import {VexmxlMeasure} from "./VexmxlMeasure";
 
 const MEASURE_LENGTH: number = 400;
-export class Tablature implements VextabItem {
-	private measures: Measure[] = [];
+export class VexmxlTablature implements VextabItem {
+	private measures: VexmxlMeasure[] = [];
 
 	constructor(private displaySheet: boolean = true, private scale: number = 1.0) {}
 
-	public addMeasure(measure: Measure): void {
+	public addMeasure(measure: VexmxlMeasure): void {
 		this.measures.push(measure);
 	}
 

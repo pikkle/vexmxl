@@ -1,10 +1,11 @@
 import {VextabItem} from "./VextabItem";
-export abstract class Time implements VextabItem {
+export abstract class VexmxlTime implements VextabItem {
 	constructor(private duration: string) {}
 
-	toString(): string {
+	public toString(): string {
 		return ":" + this.duration + " " + this.representation();
 	}
 
-	abstract representation(): string;
+	protected abstract representation(): string;
+
 }
