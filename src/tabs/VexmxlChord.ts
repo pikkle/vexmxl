@@ -1,5 +1,6 @@
 import {VexmxlNote} from "./VexmxlNote";
 import {VexmxlTime} from "./VexmxlTime";
+
 export class VexmxlChord extends VexmxlTime {
 	private notes: VexmxlNote[] = [];
 
@@ -11,7 +12,7 @@ export class VexmxlChord extends VexmxlTime {
 		return this.notes.length > 0;
 	}
 
-	public representation(): string {
+	protected representation(): string {
 		return "(" + this.notes.join (".") + ")";
 	}
 

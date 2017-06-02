@@ -6,7 +6,11 @@
     "jsRules": {},
     "rules": {
         "prefer-const": false,
-        "indent": [true, "tabs"]
+        "indent": [true, "tabs"],
+        "no-namespace": false,
+        "max-classes-per-file": [false],
+		"interface-name": false,
+	  	"no-console": [true, "log", "debug"]
     },
     "rulesDirectory": []
 }

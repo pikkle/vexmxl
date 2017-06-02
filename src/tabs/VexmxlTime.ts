@@ -6,6 +6,9 @@ export abstract class VexmxlTime implements VextabItem {
 		return ":" + this.duration + " " + this.representation();
 	}
 
-	protected abstract representation(): string;
+	public setDuration(duration: string) {
+		this.duration = duration;
+	}
 
+	protected abstract representation(): string;
 }

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -80,6 +80,9 @@ class VexmxlTime {
     toString() {
         return ":" + this.duration + " " + this.representation();
     }
+    setDuration(duration) {
+        this.duration = duration;
+    }
 }
 exports.VexmxlTime = VexmxlTime;
 
@@ -91,112 +94,113 @@ exports.VexmxlTime = VexmxlTime;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const VexmxlTime_1 = __webpack_require__(0);
-class VexmxlChord extends VexmxlTime_1.VexmxlTime {
-    constructor() {
-        super(...arguments);
-        this.notes = [];
-    }
-    addNote(note) {
-        this.notes.push(note);
-    }
-    notEmpty() {
-        return this.notes.length > 0;
-    }
-    representation() {
-        return "(" + this.notes.join(".") + ")";
-    }
+const musicxml_interfaces_1 = __webpack_require__(2);
+var Renderer = Vex.Flow.Renderer;
+const VexmxlChord_1 = __webpack_require__(6);
+const VexmxlMeasure_1 = __webpack_require__(7);
+const VexmxlNote_1 = __webpack_require__(8);
+const VexmxlRest_1 = __webpack_require__(9);
+const VexmxlTablature_1 = __webpack_require__(10);
+class ParseError extends Error {
 }
-exports.VexmxlChord = VexmxlChord;
+let qd = 5 + 1 / 3;
+let timeMap = {
+    1: "w",
+    2: "h",
+    3: "hd",
+    4: "q",
+    8: "8",
+    12: "8d",
+    16: "16",
+    24: "16d",
+    32: "32",
+};
+timeMap[qd] = "qd";
+var VexMxl;
+(function (VexMxl) {
+    function displayTablature(tab, div) {
+        let artist = new Artist(10, 10, 600, { scale: 0.8 });
+        let vt = new VexTab(artist);
+        let renderer = new Renderer(div, 3 /* SVG */);
+        let parsed = tab.toString();
+        try {
+            vt.parse(parsed);
+            artist.render(renderer);
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    VexMxl.displayTablature = displayTablature;
+    function parseXML(path) {
+        return fetch(path)
+            .then((response) => {
+            return response.text();
+        })
+            .then((score) => {
+            let doc = musicxml_interfaces_1.parseScore(score);
+            console.debug("Converted XML to ", doc);
+            let partName = doc.partList[0].id; // TODO: let the part choice to the user
+            // let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
+            let bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;
+            let divisions = 1; // Number of notes in measure
+            let tab = new VexmxlTablature_1.VexmxlTablature();
+            for (let docMeasure of doc.measures) {
+                let measure = new VexmxlMeasure_1.VexmxlMeasure();
+                let chord;
+                for (let elem of docMeasure.parts[partName]) {
+                    if (elem._class === "Attributes") {
+                        let attributes = elem;
+                        if (attributes.divisions) {
+                            divisions = attributes.divisions;
+                        }
+                    }
+                    else if (elem._class === "Note") {
+                        let note = elem;
+                        let duration = timeMap[1 / (note.duration / (divisions * 4))];
+                        if (note.rest) {
+                            if (chord && chord.notEmpty()) {
+                                measure.addTime(chord);
+                                chord = undefined;
+                            }
+                            measure.addTime(new VexmxlRest_1.VexmxlRest(duration));
+                        }
+                        else if (note.pitch) {
+                            let tech = note.notations[0].technicals[0];
+                            if (note.chord) {
+                                if (!chord) {
+                                    throw new ParseError("Chord element has not been initialized properly");
+                                }
+                            }
+                            else {
+                                if (chord && chord.notEmpty()) {
+                                    measure.addTime(chord);
+                                }
+                                chord = new VexmxlChord_1.VexmxlChord(duration);
+                            }
+                            chord.addNote(new VexmxlNote_1.VexmxlNote(tech.fret.fret, tech.string.stringNum));
+                        }
+                        else {
+                            throw new ParseError("note has not been recognized");
+                        }
+                    }
+                }
+                if (chord && chord.notEmpty()) {
+                    measure.addTime(chord);
+                }
+                if (measure.notEmpty()) {
+                    tab.addMeasure(measure);
+                }
+            }
+            return tab;
+        });
+    }
+    VexMxl.parseXML = parseXML;
+})(VexMxl = exports.VexMxl || (exports.VexMxl = {}));
 
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class VexmxlMeasure {
-    constructor() {
-        this.times = [];
-    }
-    addTime(time) {
-        this.times.push(time);
-    }
-    toString() {
-        return "  notes " + this.times.join(" ");
-    }
-    notEmpty() {
-        return this.times.length > 0;
-    }
-}
-exports.VexmxlMeasure = VexmxlMeasure;
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class VexmxlNote {
-    constructor(fret, str) {
-        this.fret = fret;
-        this.str = str;
-    }
-    toString() {
-        return this.fret + "/" + this.str;
-    }
-}
-exports.VexmxlNote = VexmxlNote;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const VexmxlTime_1 = __webpack_require__(0);
-class VexmxlRest extends VexmxlTime_1.VexmxlTime {
-    representation() {
-        return "##";
-    }
-}
-exports.VexmxlRest = VexmxlRest;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const MEASURE_LENGTH = 400;
-class VexmxlTablature {
-    constructor(displaySheet = true, scale = 1.0) {
-        this.displaySheet = displaySheet;
-        this.scale = scale;
-        this.measures = [];
-    }
-    addMeasure(measure) {
-        this.measures.push(measure);
-    }
-    toString() {
-        let width = MEASURE_LENGTH * this.measures.length;
-        let options = "options width=" + width + " scale=" + this.scale;
-        return options + "\ntabstave notation= " + this.displaySheet + "\n" + this.measures.join("|\n");
-    }
-}
-exports.VexmxlTablature = VexmxlTablature;
-
-
-/***/ }),
-/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -448,9 +452,9 @@ var xmlToDoc;
         };
     }
     else if (isNode) {
-        var DOMParser = __webpack_require__(11).DOMParser;
-        var spawnSync_1 = __webpack_require__(10).spawnSync;
-        var path_1 = __webpack_require__(8);
+        var DOMParser = __webpack_require__(12).DOMParser;
+        var spawnSync_1 = __webpack_require__(11).spawnSync;
+        var path_1 = __webpack_require__(3);
         xmlToDoc = function (str) {
             return (new DOMParser).parseFromString(str, "text/xml");
         };
@@ -24424,115 +24428,7 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 /* WEBPACK VAR INJECTION */}.call(exports, "/"))
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const musicxml_interfaces_1 = __webpack_require__(6);
-var Renderer = Vex.Flow.Renderer;
-const VexmxlChord_1 = __webpack_require__(1);
-const VexmxlMeasure_1 = __webpack_require__(2);
-const VexmxlNote_1 = __webpack_require__(3);
-const VexmxlRest_1 = __webpack_require__(4);
-const VexmxlTablature_1 = __webpack_require__(5);
-class ParseError extends Error {
-}
-let qd = 5 + 1 / 3;
-let timeMap = {
-    1: "w",
-    2: "h",
-    3: "hd",
-    4: "q",
-    8: "8",
-    12: "8d",
-    16: "16",
-    24: "16d",
-    32: "32",
-};
-timeMap[qd] = "qd";
-function parseXML(path, div) {
-    fetch(path)
-        .then((response) => {
-        return response.text();
-    })
-        .then((score) => {
-        let doc = musicxml_interfaces_1.parseScore(score);
-        console.log("Converted XML to ", doc);
-        let renderer = new Renderer(div, 3 /* SVG */);
-        let artist = new Artist(10, 10, 600, { scale: 0.8 });
-        let vt = new VexTab(artist);
-        let partName = doc.partList[0].id; // TODO: let the part choice to the user
-        // let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
-        let bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;
-        let divisions = 1; // Number of notes in measure
-        let tab = new VexmxlTablature_1.VexmxlTablature();
-        for (let docMeasure of doc.measures) {
-            let measure = new VexmxlMeasure_1.VexmxlMeasure();
-            let chord;
-            for (let elem of docMeasure.parts[partName]) {
-                if (elem._class === "Attributes") {
-                    let attributes = elem;
-                    if (attributes.divisions) {
-                        divisions = attributes.divisions;
-                    }
-                }
-                else if (elem._class === "Note") {
-                    let note = elem;
-                    let duration = timeMap[1 / (note.duration / (divisions * 4))];
-                    if (duration === undefined) {
-                        console.log(1 / (note.duration / (divisions * 4)));
-                        console.log(note.duration);
-                    }
-                    if (note.rest) {
-                        if (chord && chord.notEmpty()) {
-                            measure.addTime(chord);
-                            chord = undefined;
-                        }
-                        measure.addTime(new VexmxlRest_1.VexmxlRest(duration));
-                    }
-                    else if (elem.hasOwnProperty("pitch")) {
-                        let tech = note.notations[0].technicals[0];
-                        if (note.chord) {
-                            if (!chord) {
-                                throw new ParseError("Chord element has not been initialized properly");
-                            }
-                        }
-                        else {
-                            if (chord && chord.notEmpty()) {
-                                measure.addTime(chord);
-                            }
-                            chord = new VexmxlChord_1.VexmxlChord(duration);
-                        }
-                        chord.addNote(new VexmxlNote_1.VexmxlNote(tech.fret.fret, tech.string.stringNum));
-                    }
-                }
-            }
-            if (chord && chord.notEmpty()) {
-                measure.addTime(chord);
-            }
-            if (measure.notEmpty()) {
-                tab.addMeasure(measure);
-            }
-        }
-        try {
-            let parsed = tab.toString();
-            console.log(parsed);
-            vt.parse(parsed);
-            artist.render(renderer);
-        }
-        catch (e) {
-            console.log(e);
-        }
-    });
-}
-exports.parseXML = parseXML;
-parseXML("../test/Back In Black2.xml", document.getElementById("display"));
-
-
-/***/ }),
-/* 8 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -24760,10 +24656,10 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 9 */
+/* 4 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -24953,10 +24849,138 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 10 */
-/***/ (function(module, exports) {
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/* (ignored) */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var VexmxlTablature_1 = __webpack_require__(10);
+exports.VexmxlTablature = VexmxlTablature_1.VexmxlTablature;
+var VexmxlMeasure_1 = __webpack_require__(7);
+exports.VexmxlMeasure = VexmxlMeasure_1.VexmxlMeasure;
+var VexmxlTime_1 = __webpack_require__(0);
+exports.VexmxlTime = VexmxlTime_1.VexmxlTime;
+var VexmxlChord_1 = __webpack_require__(6);
+exports.VexmxlChord = VexmxlChord_1.VexmxlChord;
+var VexmxlRest_1 = __webpack_require__(9);
+exports.VexmxlRest = VexmxlRest_1.VexmxlRest;
+var VexmxlNote_1 = __webpack_require__(8);
+exports.VexmxlNote = VexmxlNote_1.VexmxlNote;
+var vexmxl_1 = __webpack_require__(1);
+exports.VexMxl = vexmxl_1.VexMxl;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const VexmxlTime_1 = __webpack_require__(0);
+class VexmxlChord extends VexmxlTime_1.VexmxlTime {
+    constructor() {
+        super(...arguments);
+        this.notes = [];
+    }
+    addNote(note) {
+        this.notes.push(note);
+    }
+    notEmpty() {
+        return this.notes.length > 0;
+    }
+    representation() {
+        return "(" + this.notes.join(".") + ")";
+    }
+}
+exports.VexmxlChord = VexmxlChord;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class VexmxlMeasure {
+    constructor() {
+        this.times = [];
+    }
+    addTime(time) {
+        this.times.push(time);
+    }
+    toString() {
+        return "  notes " + this.times.join(" ");
+    }
+    notEmpty() {
+        return this.times.length > 0;
+    }
+}
+exports.VexmxlMeasure = VexmxlMeasure;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class VexmxlNote {
+    constructor(fret, str) {
+        this.fret = fret;
+        this.str = str;
+    }
+    toString() {
+        return this.fret + "/" + this.str;
+    }
+}
+exports.VexmxlNote = VexmxlNote;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const VexmxlTime_1 = __webpack_require__(0);
+class VexmxlRest extends VexmxlTime_1.VexmxlTime {
+    representation() {
+        return "##";
+    }
+}
+exports.VexmxlRest = VexmxlRest;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const MEASURE_LENGTH = 400;
+class VexmxlTablature {
+    constructor(displaySheet = true, scale = 1.0) {
+        this.displaySheet = displaySheet;
+        this.scale = scale;
+        this.measures = [];
+    }
+    addMeasure(measure) {
+        this.measures.push(measure);
+    }
+    toString() {
+        let width = MEASURE_LENGTH * this.measures.length;
+        let options = "options width=" + width + " scale=" + this.scale;
+        return options + "\ntabstave notation= " + this.displaySheet + "\n" + this.measures.join("|\n");
+    }
+}
+exports.VexmxlTablature = VexmxlTablature;
+
 
 /***/ }),
 /* 11 */
@@ -24964,6 +24988,12 @@ process.umask = function() { return 0; };
 
 /* (ignored) */
 
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+/* (ignored) */
+
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle.js.map
+//# sourceMappingURL=vexmxl.js.map

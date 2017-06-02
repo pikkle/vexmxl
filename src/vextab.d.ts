@@ -1,5 +1,5 @@
 // Type definitions for VexTab v0.0.1
-// Project: http://vexflow.com
+// Project: VexTab from http://vexflow.com
 // Definitions by: Loïc Serafin <https://github.com/pikkle>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
@@ -16,14 +16,14 @@ declare interface ArtistOption {
 
 declare class Artist {
 	constructor(x: number, y: number, width: number, options?: ArtistOption);
-	render(renderer: Renderer): void;
+	public render(renderer: Renderer): void;
 }
 
 declare class VexTab {
 	constructor(artist: Artist);
-	isValid(): boolean;
-	getArtist(): Artist;
-	parseStaveOptions(options: any): any;
-	parse(tab: string): void;
+	public isValid(): boolean;
+	public getArtist(): Artist;
+	public parseStaveOptions(options: any): any;
+	public parse(tab: string): void;
 
 }
