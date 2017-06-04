@@ -10,7 +10,8 @@
         "no-namespace": false,
         "max-classes-per-file": [false],
 		"interface-name": false,
-	  	"no-console": [true, "log", "debug"]
+	  	"no-console": [true, "log", "debug"],
+        "curly": false
     },
     "rulesDirectory": []
 }

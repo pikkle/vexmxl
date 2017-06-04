@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "es2015",
-    "declaration": false
+	"sourceMap": true,
+	"noImplicitAny": true,
+	"module": "commonjs",
+	"target": "es5",
+	"declaration": true
   },
-  "include" : [
+  "include": [
 	"src/**/*"
   ]
 }

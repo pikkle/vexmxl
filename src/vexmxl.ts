@@ -83,9 +83,7 @@ export namespace VexMxl {
 								let tech = note.notations[0].technicals[0];
 
 								if (note.chord) {
-									if (!chord) {
-										throw new ParseError("Chord element has not been initialized properly");
-									}
+									if (!chord) throw new ParseError("Chord element has not been initialized properly");
 								} else {
 									if (chord && chord.notEmpty()) {
 										measure.addTime(chord);
@@ -115,3 +113,4 @@ export namespace VexMxl {
 			});
 	}
 }
+

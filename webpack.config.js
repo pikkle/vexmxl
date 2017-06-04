@@ -1,5 +1,6 @@
+var webpack = require("webpack");
 module.exports = {
-	entry: "./src/index.ts",
+	entry: "./src/vexmxl.ts",
 	output: {
 		filename: "vexmxl.js",
 		path: __dirname + "/build"
@@ -12,14 +13,24 @@ module.exports = {
 		// Add '.ts' and '.tsx' as resolvable extensions.
 		extensions: [".ts", ".js", ".json"]
 	},
+	plugins: [
+		new webpack.optimize.UglifyJsPlugin({
+			include: /\.min\.js$/,
+			minimize: true
+		})
+	],
 
 	module: {
 		rules: [
-			// All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-			{ test: /\.tsx?$/, loader: "ts-loader" },
-
-			// All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-			{ enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
+			{
+				test: /\.ts$/,
+				loader: "ts-loader"
+			},
+			{
+				enforce: "pre",
+				test: /\.js$/,
+				loader: "source-map-loader"
+			}
 		]
 	}
 };

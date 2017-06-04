@@ -39,7 +39,7 @@ declare class VexmxlMeasure implements VextabItem {
 declare abstract class VexmxlTime implements VextabItem {
 	constructor(duration: string);
 
-	public setDuration(duration: string);
+	public setDuration(duration: string): void;
 }
 
 declare class VexmxlChord extends VexmxlTime {
