@@ -4,9 +4,13 @@
 	"noImplicitAny": true,
 	"module": "commonjs",
 	"target": "es5",
-	"declaration": true
+	"declaration": true,
+	"outDir": "out"
   },
   "include": [
 	"src/**/*"
+  ],
+  "exclude": [
+	"node_modules"
   ]
 }

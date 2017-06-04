@@ -1,27 +1,30 @@
 {
- "name": "vexmxl",
- "version": "1.0.2",
- "description": "MusicXML binding for VexFlow",
- "main": "build/vexmxl.js",
- "scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1"
- },
- "author": "Pikkle",
- "license": "ISC",
- "keywords": [
-  "musicxml",
-  "vexflow"
- ],
- "dependencies": {
-  "musicxml-interfaces": "0.0.20",
-  "vexflow": "^1.2.83",
-  "vextab": "^2.0.13"
- },
- "devDependencies": {
-  "@types/vexflow": "^1.2.28",
-  "source-map-loader": "^0.2.1",
-  "ts-loader": "^2.1.0",
-  "typescript": "^2.3.3",
-  "webpack": "^2.6.1"
- }
+  "name": "vexmxl",
+  "version": "1.0.3",
+  "description": "MusicXML binding for VexFlow",
+  "main": "out/vexmxl.js",
+  "typings": "out/index.d.ts",
+  "scripts": {
+	"compile": "rimraf out && tsc",
+	"preinstall": "npm run compile",
+	"prepublish": "npm run compile"
+  },
+  "author": "Pikkle",
+  "license": "ISC",
+  "keywords": [
+	"musicxml",
+	"vexflow"
+  ],
+  "dependencies": {
+	"musicxml-interfaces": "0.0.20",
+	"vexflow": "^1.2.83",
+	"vextab": "^2.0.13"
+  },
+  "devDependencies": {
+	"@types/vexflow": "^1.2.28",
+	"source-map-loader": "^0.2.1",
+	"ts-loader": "^2.1.0",
+	"typescript": "^2.3.3",
+	"webpack": "^2.6.1"
+  }
 }

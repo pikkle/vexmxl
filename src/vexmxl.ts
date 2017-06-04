@@ -1,11 +1,7 @@
 import {Attributes, Note, parseScore, ScorePart, ScoreTimewise} from "musicxml-interfaces";
 import Renderer = Vex.Flow.Renderer;
 import RuntimeError = Vex.RuntimeError;
-import {VexmxlChord} from "./tabs/VexmxlChord";
-import {VexmxlMeasure} from "./tabs/VexmxlMeasure";
-import {VexmxlNote} from "./tabs/VexmxlNote";
-import {VexmxlRest} from "./tabs/VexmxlRest";
-import {VexmxlTablature} from "./tabs/VexmxlTablature";
+import {VexMxlTab} from "./vexmxl.tab";
 
 class ParseError extends Error {
 }
@@ -26,11 +22,11 @@ timeMap[qd] = "qd";
 
 export namespace VexMxl {
 
-	export function displayTablature(tab: VexmxlTablature, div: HTMLElement): void {
+	export function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement): void {
 		let artist: Artist = new Artist(10, 10, 600, {scale: 0.8});
 		let vt: VexTab = new VexTab(artist);
 		let renderer: Renderer = new Renderer(div, Renderer.Backends.SVG);
-		let parsed = tab.toString();
+		let parsed = VexMxlTab.toString();
 
 		try {
 			vt.parse(parsed);
@@ -40,7 +36,7 @@ export namespace VexMxl {
 		}
 	}
 
-	export function parseXML(path: string): Promise<VexmxlTablature> {
+	export function parseXML(path: string): Promise<VexMxlTab.VexmxlTablature> {
 		return fetch(path)
 			.then((response: Body) => {
 				return response.text();
@@ -55,11 +51,11 @@ export namespace VexMxl {
 				let bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;
 
 				let divisions = 1; // Number of notes in measure
-				let tab = new VexmxlTablature();
+				let tab = new VexMxlTab.VexmxlTablature();
 
 				for (let docMeasure of doc.measures) {
-					let measure = new VexmxlMeasure();
-					let chord: VexmxlChord;
+					let measure = new VexMxlTab.VexmxlMeasure();
+					let chord: VexMxlTab.VexmxlChord;
 
 					for (let elem of docMeasure.parts[partName]) {
 						if (elem._class === "Attributes") {
@@ -77,7 +73,7 @@ export namespace VexMxl {
 									measure.addTime(chord);
 									chord = undefined;
 								}
-								measure.addTime(new VexmxlRest(duration));
+								measure.addTime(new VexMxlTab.VexmxlRest(duration));
 
 							} else if (note.pitch) {
 								let tech = note.notations[0].technicals[0];
@@ -88,9 +84,9 @@ export namespace VexMxl {
 									if (chord && chord.notEmpty()) {
 										measure.addTime(chord);
 									}
-									chord = new VexmxlChord(duration);
+									chord = new VexMxlTab.VexmxlChord(duration);
 								}
-								chord.addNote(new VexmxlNote(tech.fret.fret, tech.string.stringNum));
+								chord.addNote(new VexMxlTab.VexmxlNote(tech.fret.fret, tech.string.stringNum));
 							} else {
 								throw new ParseError("note has not been recognized");
 							}
