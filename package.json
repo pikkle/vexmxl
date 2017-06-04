@@ -1,13 +1,11 @@
 {
   "name": "vexmxl",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "MusicXML binding for VexFlow",
   "main": "out/vexmxl.js",
   "typings": "out/index.d.ts",
   "scripts": {
-	"compile": "rimraf out && tsc",
-	"preinstall": "npm run compile",
-	"prepublish": "npm run compile"
+	"compile": "rimraf out && tsc"
   },
   "author": "Pikkle",
   "license": "ISC",

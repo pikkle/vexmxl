@@ -1,29 +1,22 @@
 # vexmxl
-> The project is in alpha, nothing is functional for now.
 
 Vexmxl has for purpose to use VexTab (by extension VexFlow) alongside MusicXML files to display tablatures and music sheets.
 
-This project will eventually be able to read MusicXML on both MXL and XML file extensions.
+This project will eventually be able to read MusicXML on both MXL and XML file extensions (right now with XML only).
 
-## Installation
-First, clone the project
+Types for typescript is already given in the output ! You simple have to import the project with npm :)
+
+## Usage
+Install the package using npm:
 ```
-git clone https://github.com/pikkle/vexmxl.git
+npm install vexmxl
 ```
-Open the new folder
+
+Parse your XML and display the computed tablature:
 ```
-cd vexmxl
+VexMxl.parseXML("Back In Black.xml").then(tab => {
+    VexMxl.displayTablature(tab, document.getElementById("display"))
+});
 ```
-Install the npm packages
-```
-npm install
-```
-Compile the project with webpack
-```
-webpack
-```
-Serve the static files with an HTTP server, for example with python:
-```
-python -m http.server 8080
-```
-And open your browser on http://localhost:8080.
+
+Both the parsing and the displaying by VexFlow take a while ! (a few seconds).
