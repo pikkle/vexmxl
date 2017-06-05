@@ -1,6 +1,6 @@
 {
   "name": "vexmxl",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "MusicXML binding for VexFlow",
   "main": "out/vexmxl.js",
   "typings": "out/index.d.ts",
