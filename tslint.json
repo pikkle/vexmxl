@@ -11,7 +11,8 @@
         "max-classes-per-file": [false],
 		"interface-name": false,
 	  	"no-console": [true, "log", "debug"],
-        "curly": false
+        "curly": false,
+        "variable-name": false
     },
     "rulesDirectory": []
 }

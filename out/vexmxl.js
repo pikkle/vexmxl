@@ -13,6 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var musicxml_interfaces_1 = require("musicxml-interfaces");
 var Renderer = Vex.Flow.Renderer;
 var vexmxl_tab_1 = require("./vexmxl.tab");
+var VexmxlDuration = vexmxl_tab_1.VexMxlTab.VexmxlDuration;
 var ParseError = (function (_super) {
     __extends(ParseError, _super);
     function ParseError() {
@@ -22,24 +23,24 @@ var ParseError = (function (_super) {
 }(Error));
 var qd = 5 + 1 / 3;
 var timeMap = {
-    1: "w",
-    2: "h",
-    3: "hd",
-    4: "q",
-    8: "8",
-    12: "8d",
-    16: "16",
-    24: "16d",
-    32: "32",
+    1: VexmxlDuration.WHOLE,
+    2: VexmxlDuration.HALF,
+    3: VexmxlDuration.HALF_DOT,
+    4: VexmxlDuration.QUARTER,
+    8: VexmxlDuration.EIGHTH,
+    12: VexmxlDuration.EIGHTH_DOT,
+    16: VexmxlDuration.SIXTEENTH,
+    24: VexmxlDuration.SIXTEENTH_DOT,
+    32: VexmxlDuration.THIRTYSECOND,
 };
-timeMap[qd] = "qd";
+timeMap[qd] = VexmxlDuration.QUARTER_DOT;
 var VexMxl;
 (function (VexMxl) {
     function displayTablature(tab, div) {
         var artist = new Artist(10, 10, 600, { scale: 0.8 });
         var vt = new VexTab(artist);
         var renderer = new Renderer(div, 3 /* SVG */);
-        var parsed = vexmxl_tab_1.VexMxlTab.toString();
+        var parsed = tab.toString();
         try {
             vt.parse(parsed);
             artist.render(renderer);
@@ -56,7 +57,6 @@ var VexMxl;
         })
             .then(function (score) {
             var doc = musicxml_interfaces_1.parseScore(score);
-            console.debug("Converted XML to ", doc);
             var partName = doc.partList[0].id; // TODO: let the part choice to the user
             // let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
             var bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;

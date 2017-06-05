@@ -24,9 +24,20 @@ var VexMxlTab;
         VexmxlTablature.prototype.addMeasure = function (measure) {
             this.measures.push(measure);
         };
+        VexmxlTablature.prototype.getMeasures = function () {
+            return this.measures;
+        };
+        VexmxlTablature.prototype.displayMusicSheet = function (b) {
+            this.displaySheet = b;
+        };
+        VexmxlTablature.prototype.displayScale = function (ratio) {
+            this.scale = ratio;
+        };
+        VexmxlTablature.prototype.width = function () {
+            return MEASURE_LENGTH * this.measures.length;
+        };
         VexmxlTablature.prototype.toString = function () {
-            var width = MEASURE_LENGTH * this.measures.length;
-            var options = "options width=" + width + " scale=" + this.scale;
+            var options = "options width=" + this.width() + " scale=" + this.scale;
             return options + "\ntabstave notation= " + this.displaySheet + "\n" + this.measures.join("|\n");
         };
         return VexmxlTablature;
@@ -39,6 +50,9 @@ var VexMxlTab;
         VexmxlMeasure.prototype.addTime = function (time) {
             this.times.push(time);
         };
+        VexmxlMeasure.prototype.getTimes = function () {
+            return this.times;
+        };
         VexmxlMeasure.prototype.toString = function () {
             return "  notes " + this.times.join(" ");
         };
@@ -48,12 +62,35 @@ var VexMxlTab;
         return VexmxlMeasure;
     }());
     VexMxlTab.VexmxlMeasure = VexmxlMeasure;
+    var VexmxlDuration = (function () {
+        function VexmxlDuration(representation) {
+            this.representation = representation;
+        }
+        VexmxlDuration.prototype.toString = function () {
+            return this.representation;
+        };
+        return VexmxlDuration;
+    }());
+    VexmxlDuration.WHOLE = new VexmxlDuration("w");
+    VexmxlDuration.HALF = new VexmxlDuration("h");
+    VexmxlDuration.HALF_DOT = new VexmxlDuration("hd");
+    VexmxlDuration.QUARTER = new VexmxlDuration("q");
+    VexmxlDuration.QUARTER_DOT = new VexmxlDuration("qd");
+    VexmxlDuration.EIGHTH = new VexmxlDuration("8");
+    VexmxlDuration.EIGHTH_DOT = new VexmxlDuration("8d");
+    VexmxlDuration.SIXTEENTH = new VexmxlDuration("16");
+    VexmxlDuration.SIXTEENTH_DOT = new VexmxlDuration("16d");
+    VexmxlDuration.THIRTYSECOND = new VexmxlDuration("32");
+    VexMxlTab.VexmxlDuration = VexmxlDuration;
     var VexmxlTime = (function () {
         function VexmxlTime(duration) {
             this.duration = duration;
         }
         VexmxlTime.prototype.toString = function () {
             return ":" + this.duration + " " + this.representation();
+        };
+        VexmxlTime.prototype.getDuration = function () {
+            return this.duration;
         };
         VexmxlTime.prototype.setDuration = function (duration) {
             this.duration = duration;
@@ -70,6 +107,9 @@ var VexMxlTab;
         }
         VexmxlChord.prototype.addNote = function (note) {
             this.notes.push(note);
+        };
+        VexmxlChord.prototype.getNotes = function () {
+            return this.notes;
         };
         VexmxlChord.prototype.notEmpty = function () {
             return this.notes.length > 0;
@@ -98,6 +138,12 @@ var VexMxlTab;
         }
         VexmxlNote.prototype.toString = function () {
             return this.fret + "/" + this.str;
+        };
+        VexmxlNote.prototype.getFret = function () {
+            return this.fret;
+        };
+        VexmxlNote.prototype.getString = function () {
+            return this.str;
         };
         return VexmxlNote;
     }());

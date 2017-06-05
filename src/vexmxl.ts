@@ -2,23 +2,24 @@ import {Attributes, Note, parseScore, ScorePart, ScoreTimewise} from "musicxml-i
 import Renderer = Vex.Flow.Renderer;
 import RuntimeError = Vex.RuntimeError;
 import {VexMxlTab} from "./vexmxl.tab";
+import VexmxlDuration = VexMxlTab.VexmxlDuration;
 
 class ParseError extends Error {
 }
 
 let qd = 5 + 1 / 3;
-let timeMap: any = {
-	1: "w",
-	2: "h",
-	3: "hd",
-	4: "q",
-	8: "8",
-	12: "8d",
-	16: "16",
-	24: "16d",
-	32: "32",
+let timeMap: {[key: number]: VexmxlDuration} = { // TODO: fix times, a half dotted is longer than a half...
+	1: VexmxlDuration.WHOLE,
+	2: VexmxlDuration.HALF,
+	3: VexmxlDuration.HALF_DOT,
+	4: VexmxlDuration.QUARTER,
+	8: VexmxlDuration.EIGHTH,
+	12: VexmxlDuration.EIGHTH_DOT,
+	16: VexmxlDuration.SIXTEENTH,
+	24: VexmxlDuration.SIXTEENTH_DOT,
+	32: VexmxlDuration.THIRTYSECOND,
 };
-timeMap[qd] = "qd";
+timeMap[qd] = VexmxlDuration.QUARTER_DOT;
 
 export namespace VexMxl {
 
@@ -43,8 +44,6 @@ export namespace VexMxl {
 			})
 			.then((score: string) => {
 				let doc: ScoreTimewise = parseScore(score);
-				console.debug("Converted XML to ", doc);
-
 				let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
 
 				// let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
@@ -109,4 +108,3 @@ export namespace VexMxl {
 			});
 	}
 }
-
