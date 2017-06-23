@@ -15,6 +15,7 @@ declare interface ArtistOption {
 }
 
 declare class Artist {
+	public NOLOGO: boolean;
 	constructor(x: number, y: number, width: number, options?: ArtistOption);
 	public render(renderer: Renderer): void;
 }

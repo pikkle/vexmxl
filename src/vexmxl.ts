@@ -25,6 +25,7 @@ export namespace VexMxl {
 
 	export function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement): void {
 		let artist: Artist = new Artist(10, 10, 600, {scale: 0.8});
+		artist.NOLOGO = true;
 		let vt: VexTab = new VexTab(artist);
 		let renderer: Renderer = new Renderer(div, Renderer.Backends.SVG);
 		let parsed = tab.toString();
