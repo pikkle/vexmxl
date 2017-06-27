@@ -23,11 +23,11 @@ timeMap[qd] = VexmxlDuration.QUARTER_DOT;
 
 export namespace VexMxl {
 
-	export function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement): void {
+	function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement, canvas: boolean): void {
 		let artist: Artist = new Artist(10, 10, 600, {scale: 0.8});
 		artist.NOLOGO = true;
 		let vt: VexTab = new VexTab(artist);
-		let renderer: Renderer = new Renderer(div, Renderer.Backends.SVG);
+		let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
 		let parsed = tab.toString();
 
 		try {
@@ -37,6 +37,39 @@ export namespace VexMxl {
 			console.error(e);
 		}
 	}
+
+	export function generateSVG(tab: VexMxlTab.VexmxlTablature): HTMLDivElement {
+		let div = document.createElement( "div" );
+		displayTablature(tab, div, false);
+		return div;
+	}
+
+	export function generateCanvas(tab: VexMxlTab.VexmxlTablature): HTMLCanvasElement {
+		let canvas = document.createElement( "canvas" );
+		displayTablature(tab, canvas, true);
+		return canvas;
+	}
+
+	export function generateImage(tab: VexMxlTab.VexmxlTablature): HTMLImageElement {
+		let display = generateSVG(tab);
+
+		let svg = display.children[0];
+		let svgData = new XMLSerializer().serializeToString( svg );
+
+		let canvas = document.createElement( "canvas" );
+		let ctx = canvas.getContext( "2d" );
+
+		let img = document.createElement( "img" );
+		img.setAttribute( "src", "data:image/svg+xml;base64," + btoa( svgData ) );
+
+		img.onload = function() {
+			ctx.drawImage( img, 0, 0 );
+			console.log( canvas.toDataURL( "image/png" ) );
+		};
+
+		return img;
+	}
+
 
 	export function parseXML(path: string): Promise<VexMxlTab.VexmxlTablature> {
 		return fetch(path)

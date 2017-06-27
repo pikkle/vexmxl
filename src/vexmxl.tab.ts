@@ -93,6 +93,8 @@ export namespace VexMxlTab {
 			this.duration = duration;
 		}
 
+		public adaptPitch(modifier: number): void {};
+
 		protected abstract representation(): string;
 	}
 
@@ -100,7 +102,16 @@ export namespace VexMxlTab {
 		private notes: VexmxlNote[] = [];
 
 		public addNote(note: VexmxlNote): void {
-			this.notes.push(note);
+			if (this.hasNote(note.getString())) {
+				throw new Error("A chord can only have one note on the same string")
+			} else this.notes.push(note);
+		}
+
+		private hasNote(string: number): boolean {
+			for (let note of this.notes) {
+				if (note.getString() === string) return true;
+			}
+			return false;
 		}
 
 		public getNotes(): VexmxlNote[] {
@@ -115,6 +126,12 @@ export namespace VexMxlTab {
 			return "(" + this.notes.join(".") + ")";
 		}
 
+		public adaptPitch(modifier: number): void {
+			for (let note of this.notes) {
+				note.adaptPitch(modifier);
+			}
+		}
+
 	}
 
 	export class VexmxlRest extends VexmxlTime {
@@ -126,12 +143,20 @@ export namespace VexMxlTab {
 	}
 
 	export class VexmxlNote implements VextabItem {
+		private modifier: number;
 
 		constructor(private fret: number, private str: number) {
+			if (str <= 0 || str > 6) {
+				throw new Error("A string is in the bounds [1, 6]");
+			} else if (fret < 0 || fret > 24) {
+				throw new Error("A fret is in the bounds [0, 24]");
+			}
+
+			this.modifier = 0;
 		}
 
 		public toString(): string {
-			return this.fret + "/" + this.str;
+			return (this.fret+this.modifier) + "/" + this.str;
 		}
 
 		public getFret(): number {
@@ -140,6 +165,10 @@ export namespace VexMxlTab {
 
 		public getString(): number {
 			return this.str;
+		}
+
+		public adaptPitch(modifier: number): void {
+			this.modifier = modifier;
 		}
 	}
 

@@ -8,20 +8,10 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], function (require, exports, musicxml_interfaces_1, vexmxl_tab_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var musicxml_interfaces_1 = require("musicxml-interfaces");
     var Renderer = Vex.Flow.Renderer;
-    var vexmxl_tab_1 = require("./vexmxl.tab");
     var VexmxlDuration = vexmxl_tab_1.VexMxlTab.VexmxlDuration;
     var ParseError = (function (_super) {
         __extends(ParseError, _super);

@@ -11,8 +11,8 @@
     "types": [ "vexflow", "intern" ]
   },
   "include": [
-    "src/**/*",
-    "tests/**/*.ts"
+    "src/**/*"
+    //"tests/**/*.ts"
   ],
   "exclude": [
     "node_modules"

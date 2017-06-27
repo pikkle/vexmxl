@@ -1,1 +1,3 @@
-src
+/src/
+/tests/
+/out/tests/
