@@ -42,14 +42,17 @@ export declare namespace VexMxlTab {
         toString(): string;
         getDuration(): VexmxlDuration;
         setDuration(duration: VexmxlDuration): void;
+        adaptPitch(modifier: number): void;
         protected abstract representation(): string;
     }
     class VexmxlChord extends VexmxlTime {
         private notes;
         addNote(note: VexmxlNote): void;
+        private hasNote(string);
         getNotes(): VexmxlNote[];
         notEmpty(): boolean;
         protected representation(): string;
+        adaptPitch(modifier: number): void;
     }
     class VexmxlRest extends VexmxlTime {
         protected representation(): string;
@@ -57,9 +60,11 @@ export declare namespace VexMxlTab {
     class VexmxlNote implements VextabItem {
         private fret;
         private str;
+        private modifier;
         constructor(fret: number, str: number);
         toString(): string;
         getFret(): number;
         getString(): number;
+        adaptPitch(modifier: number): void;
     }
 }

@@ -8,10 +8,20 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], function (require, exports, musicxml_interfaces_1, vexmxl_tab_1) {
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], factory);
+    }
+})(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var musicxml_interfaces_1 = require("musicxml-interfaces");
     var Renderer = Vex.Flow.Renderer;
+    var vexmxl_tab_1 = require("./vexmxl.tab");
     var VexmxlDuration = vexmxl_tab_1.VexMxlTab.VexmxlDuration;
     var ParseError = (function (_super) {
         __extends(ParseError, _super);
@@ -35,11 +45,11 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], function (
     timeMap[qd] = VexmxlDuration.QUARTER_DOT;
     var VexMxl;
     (function (VexMxl) {
-        function displayTablature(tab, div) {
+        function displayTablature(tab, div, canvas) {
             var artist = new Artist(10, 10, 600, { scale: 0.8 });
             artist.NOLOGO = true;
             var vt = new VexTab(artist);
-            var renderer = new Renderer(div, 3 /* SVG */);
+            var renderer = new Renderer(div, canvas ? 1 /* CANVAS */ : 3 /* SVG */);
             var parsed = tab.toString();
             try {
                 vt.parse(parsed);
@@ -49,7 +59,33 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], function (
                 console.error(e);
             }
         }
-        VexMxl.displayTablature = displayTablature;
+        function generateSVG(tab) {
+            var div = document.createElement("div");
+            displayTablature(tab, div, false);
+            return div;
+        }
+        VexMxl.generateSVG = generateSVG;
+        function generateCanvas(tab) {
+            var canvas = document.createElement("canvas");
+            displayTablature(tab, canvas, true);
+            return canvas;
+        }
+        VexMxl.generateCanvas = generateCanvas;
+        function generateImage(tab) {
+            var display = generateSVG(tab);
+            var svg = display.children[0];
+            var svgData = new XMLSerializer().serializeToString(svg);
+            var canvas = document.createElement("canvas");
+            var ctx = canvas.getContext("2d");
+            var img = document.createElement("img");
+            img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
+            img.onload = function () {
+                ctx.drawImage(img, 0, 0);
+                console.log(canvas.toDataURL("image/png"));
+            };
+            return img;
+        }
+        VexMxl.generateImage = generateImage;
         function parseXML(path) {
             return fetch(path)
                 .then(function (response) {

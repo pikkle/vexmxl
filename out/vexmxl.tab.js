@@ -8,7 +8,15 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports"], function (require, exports) {
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports"], factory);
+    }
+})(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var VexMxlTab;
@@ -96,6 +104,8 @@ define(["require", "exports"], function (require, exports) {
             VexmxlTime.prototype.setDuration = function (duration) {
                 this.duration = duration;
             };
+            VexmxlTime.prototype.adaptPitch = function (modifier) { };
+            ;
             return VexmxlTime;
         }());
         VexMxlTab.VexmxlTime = VexmxlTime;
@@ -107,7 +117,19 @@ define(["require", "exports"], function (require, exports) {
                 return _this;
             }
             VexmxlChord.prototype.addNote = function (note) {
-                this.notes.push(note);
+                if (this.hasNote(note.getString())) {
+                    throw new Error("A chord can only have one note on the same string");
+                }
+                else
+                    this.notes.push(note);
+            };
+            VexmxlChord.prototype.hasNote = function (string) {
+                for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+                    var note = _a[_i];
+                    if (note.getString() === string)
+                        return true;
+                }
+                return false;
             };
             VexmxlChord.prototype.getNotes = function () {
                 return this.notes;
@@ -117,6 +139,12 @@ define(["require", "exports"], function (require, exports) {
             };
             VexmxlChord.prototype.representation = function () {
                 return "(" + this.notes.join(".") + ")";
+            };
+            VexmxlChord.prototype.adaptPitch = function (modifier) {
+                for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+                    var note = _a[_i];
+                    note.adaptPitch(modifier);
+                }
             };
             return VexmxlChord;
         }(VexmxlTime));
@@ -136,15 +164,25 @@ define(["require", "exports"], function (require, exports) {
             function VexmxlNote(fret, str) {
                 this.fret = fret;
                 this.str = str;
+                if (str <= 0 || str > 6) {
+                    throw new Error("A string is in the bounds [1, 6]");
+                }
+                else if (fret < 0 || fret > 24) {
+                    throw new Error("A fret is in the bounds [0, 24]");
+                }
+                this.modifier = 0;
             }
             VexmxlNote.prototype.toString = function () {
-                return this.fret + "/" + this.str;
+                return (this.fret + this.modifier) + "/" + this.str;
             };
             VexmxlNote.prototype.getFret = function () {
                 return this.fret;
             };
             VexmxlNote.prototype.getString = function () {
                 return this.str;
+            };
+            VexmxlNote.prototype.adaptPitch = function (modifier) {
+                this.modifier = modifier;
             };
             return VexmxlNote;
         }());
