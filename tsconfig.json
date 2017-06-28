@@ -8,7 +8,7 @@
     "target": "es5",
     "declaration": true,
     "outDir": "out",
-    "types": [ "vexflow", "intern" ]
+    "types": [ "vexflow" ]
   },
   "include": [
     "src/**/*"

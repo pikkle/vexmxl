@@ -57,24 +57,17 @@ export namespace VexMxlTab {
 		}
 	}
 
-	export class VexmxlDuration implements VextabItem {
-		public static WHOLE: VexmxlDuration = new VexmxlDuration("w");
-		public static HALF: VexmxlDuration = new VexmxlDuration("h");
-		public static HALF_DOT: VexmxlDuration = new VexmxlDuration("hd");
-		public static QUARTER: VexmxlDuration = new VexmxlDuration("q");
-		public static QUARTER_DOT: VexmxlDuration = new VexmxlDuration("qd");
-		public static EIGHTH: VexmxlDuration = new VexmxlDuration("8");
-		public static EIGHTH_DOT: VexmxlDuration = new VexmxlDuration("8d");
-		public static SIXTEENTH: VexmxlDuration = new VexmxlDuration("16");
-		public static SIXTEENTH_DOT: VexmxlDuration = new VexmxlDuration("16d");
-		public static THIRTYSECOND: VexmxlDuration = new VexmxlDuration("32");
-
-		private constructor(private representation: string) {
-		}
-
-		public toString(): string {
-			return this.representation;
-		}
+	export enum VexmxlDuration {
+		WHOLE = "w",
+		HALF = "h",
+		HALF_DOT = "hd",
+		QUARTER = "q",
+		QUARTER_DOT = "qd",
+		EIGHTH = "8",
+		EIGHTH_DOT = "8d",
+		SIXTEENTH = "16",
+		SIXTEENTH_DOT = "16d",
+		THIRTYSECOND = "32"
 	}
 
 	export abstract class VexmxlTime implements VextabItem {
@@ -82,7 +75,7 @@ export namespace VexMxlTab {
 		}
 
 		public toString(): string {
-			return ":" + this.duration + " " + this.representation();
+			return `: ${this.duration} ${this.representation()}`;
 		}
 
 		public getDuration(): VexmxlDuration {
@@ -123,7 +116,7 @@ export namespace VexMxlTab {
 		}
 
 		protected representation(): string {
-			return "(" + this.notes.join(".") + ")";
+			return `(${this.notes.join(".")})`;
 		}
 
 		public adaptPitch(modifier: number): void {
@@ -156,7 +149,7 @@ export namespace VexMxlTab {
 		}
 
 		public toString(): string {
-			return (this.fret+this.modifier) + "/" + this.str;
+			return `${(this.fret+this.modifier)}/${this.str}`;
 		}
 
 		public getFret(): number {

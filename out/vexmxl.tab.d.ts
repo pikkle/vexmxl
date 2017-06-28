@@ -21,20 +21,17 @@ export declare namespace VexMxlTab {
         toString(): string;
         notEmpty(): boolean;
     }
-    class VexmxlDuration implements VextabItem {
-        private representation;
-        static WHOLE: VexmxlDuration;
-        static HALF: VexmxlDuration;
-        static HALF_DOT: VexmxlDuration;
-        static QUARTER: VexmxlDuration;
-        static QUARTER_DOT: VexmxlDuration;
-        static EIGHTH: VexmxlDuration;
-        static EIGHTH_DOT: VexmxlDuration;
-        static SIXTEENTH: VexmxlDuration;
-        static SIXTEENTH_DOT: VexmxlDuration;
-        static THIRTYSECOND: VexmxlDuration;
-        private constructor(representation);
-        toString(): string;
+    enum VexmxlDuration {
+        WHOLE = "w",
+        HALF = "h",
+        HALF_DOT = "hd",
+        QUARTER = "q",
+        QUARTER_DOT = "qd",
+        EIGHTH = "8",
+        EIGHTH_DOT = "8d",
+        SIXTEENTH = "16",
+        SIXTEENTH_DOT = "16d",
+        THIRTYSECOND = "32",
     }
     abstract class VexmxlTime implements VextabItem {
         private duration;

@@ -8,7 +8,7 @@ class ParseError extends Error {
 }
 
 let qd = 5 + 1 / 3;
-let timeMap: {[key: number]: VexmxlDuration} = { // TODO: fix times, a half dotted is longer than a half...
+let timeMap: { [key: number]: VexmxlDuration } = { // TODO: fix times, a half dotted is longer than a half...
 	1: VexmxlDuration.WHOLE,
 	2: VexmxlDuration.HALF,
 	3: VexmxlDuration.HALF_DOT,
@@ -39,13 +39,13 @@ export namespace VexMxl {
 	}
 
 	export function generateSVG(tab: VexMxlTab.VexmxlTablature): HTMLDivElement {
-		let div = document.createElement( "div" );
+		let div = document.createElement("div");
 		displayTablature(tab, div, false);
 		return div;
 	}
 
 	export function generateCanvas(tab: VexMxlTab.VexmxlTablature): HTMLCanvasElement {
-		let canvas = document.createElement( "canvas" );
+		let canvas = document.createElement("canvas");
 		displayTablature(tab, canvas, true);
 		return canvas;
 	}
@@ -54,30 +54,32 @@ export namespace VexMxl {
 		let display = generateSVG(tab);
 
 		let svg = display.children[0];
-		let svgData = new XMLSerializer().serializeToString( svg );
+		let svgData = new XMLSerializer().serializeToString(svg);
 
-		let canvas = document.createElement( "canvas" );
-		let ctx = canvas.getContext( "2d" );
+		let canvas = document.createElement("canvas");
+		let ctx = canvas.getContext("2d");
 
-		let img = document.createElement( "img" );
-		img.setAttribute( "src", "data:image/svg+xml;base64," + btoa( svgData ) );
+		let img = document.createElement("img");
+		img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
 
-		img.onload = function() {
-			ctx.drawImage( img, 0, 0 );
-			console.log( canvas.toDataURL( "image/png" ) );
+		img.onload = function () {
+			ctx.drawImage(img, 0, 0);
+			console.log(canvas.toDataURL("image/png"));
 		};
 
 		return img;
 	}
 
 
-	export function parseXML(path: string): Promise<VexMxlTab.VexmxlTablature> {
+	export function parseXML(path: string, debug: boolean = false): Promise<VexMxlTab.VexmxlTablature> {
 		return fetch(path)
 			.then((response: Body) => {
 				return response.text();
 			})
 			.then((score: string) => {
 				let doc: ScoreTimewise = parseScore(score);
+				if (debug) console.debug(doc);
+
 				let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
 
 				// let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);

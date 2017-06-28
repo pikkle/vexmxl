@@ -1,6 +1,6 @@
 {
   "name": "vexmxl",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "MusicXML binding for VexFlow",
   "repository": "https://github.com/pikkle/vexmxl",
   "main": "out/vexmxl.js",
@@ -22,10 +22,10 @@
     "vextab": "^2.0.13"
   },
   "devDependencies": {
-    "@types/vexflow": "^1.2.28",
+    "@types/vexflow": "^1.2.29",
     "intern": "^3.4.5",
     "source-map-loader": "^0.2.1",
     "ts-loader": "^2.2.0",
-    "typescript": "^2.3.4"
+    "typescript": "^2.4.1"
   }
 }

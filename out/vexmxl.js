@@ -76,13 +76,16 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], function (
             return img;
         }
         VexMxl.generateImage = generateImage;
-        function parseXML(path) {
+        function parseXML(path, debug) {
+            if (debug === void 0) { debug = false; }
             return fetch(path)
                 .then(function (response) {
                 return response.text();
             })
                 .then(function (score) {
                 var doc = musicxml_interfaces_1.parseScore(score);
+                if (debug)
+                    console.debug(doc);
                 var partName = doc.partList[0].id; // TODO: let the part choice to the user
                 // let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
                 var bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;

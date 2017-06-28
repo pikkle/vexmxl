@@ -63,32 +63,25 @@ define(["require", "exports"], function (require, exports) {
             return VexmxlMeasure;
         }());
         VexMxlTab.VexmxlMeasure = VexmxlMeasure;
-        var VexmxlDuration = (function () {
-            function VexmxlDuration(representation) {
-                this.representation = representation;
-            }
-            VexmxlDuration.prototype.toString = function () {
-                return this.representation;
-            };
-            return VexmxlDuration;
-        }());
-        VexmxlDuration.WHOLE = new VexmxlDuration("w");
-        VexmxlDuration.HALF = new VexmxlDuration("h");
-        VexmxlDuration.HALF_DOT = new VexmxlDuration("hd");
-        VexmxlDuration.QUARTER = new VexmxlDuration("q");
-        VexmxlDuration.QUARTER_DOT = new VexmxlDuration("qd");
-        VexmxlDuration.EIGHTH = new VexmxlDuration("8");
-        VexmxlDuration.EIGHTH_DOT = new VexmxlDuration("8d");
-        VexmxlDuration.SIXTEENTH = new VexmxlDuration("16");
-        VexmxlDuration.SIXTEENTH_DOT = new VexmxlDuration("16d");
-        VexmxlDuration.THIRTYSECOND = new VexmxlDuration("32");
-        VexMxlTab.VexmxlDuration = VexmxlDuration;
+        var VexmxlDuration;
+        (function (VexmxlDuration) {
+            VexmxlDuration["WHOLE"] = "w";
+            VexmxlDuration["HALF"] = "h";
+            VexmxlDuration["HALF_DOT"] = "hd";
+            VexmxlDuration["QUARTER"] = "q";
+            VexmxlDuration["QUARTER_DOT"] = "qd";
+            VexmxlDuration["EIGHTH"] = "8";
+            VexmxlDuration["EIGHTH_DOT"] = "8d";
+            VexmxlDuration["SIXTEENTH"] = "16";
+            VexmxlDuration["SIXTEENTH_DOT"] = "16d";
+            VexmxlDuration["THIRTYSECOND"] = "32";
+        })(VexmxlDuration = VexMxlTab.VexmxlDuration || (VexMxlTab.VexmxlDuration = {}));
         var VexmxlTime = (function () {
             function VexmxlTime(duration) {
                 this.duration = duration;
             }
             VexmxlTime.prototype.toString = function () {
-                return ":" + this.duration + " " + this.representation();
+                return ": " + this.duration + " " + this.representation();
             };
             VexmxlTime.prototype.getDuration = function () {
                 return this.duration;
