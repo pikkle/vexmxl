@@ -14,6 +14,12 @@ export declare namespace VexMxlTab {
         width(): number;
         toString(): string;
     }
+    class VexmxlTimeSignature implements VextabItem {
+        private beats;
+        private beatType;
+        constructor(beats: number, beatType: number);
+        toString(): string;
+    }
     class VexmxlMeasure implements VextabItem {
         private times;
         addTime(time: VexmxlTime): void;

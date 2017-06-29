@@ -3,7 +3,6 @@
 // Definitions by: Loïc Serafin <https://github.com/pikkle>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-import Renderer = Vex.Flow.Renderer;
 declare interface ArtistOption {
 	font_face?: string;
 	font_size?: number;
@@ -17,7 +16,7 @@ declare interface ArtistOption {
 declare class Artist {
 	public NOLOGO: boolean;
 	constructor(x: number, y: number, width: number, options?: ArtistOption);
-	public render(renderer: Renderer): void;
+	public render(renderer: Vex.Flow.Renderer): void;
 }
 
 declare class VexTab {
@@ -27,4 +26,8 @@ declare class VexTab {
 	public parseStaveOptions(options: any): any;
 	public parse(tab: string): void;
 
+}
+
+declare module "VexTab" {
+	export = VexTab;
 }

@@ -11,7 +11,6 @@ var __extends = (this && this.__extends) || (function () {
 define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab"], function (require, exports, musicxml_interfaces_1, vexmxl_tab_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Renderer = Vex.Flow.Renderer;
     var VexmxlDuration = vexmxl_tab_1.VexMxlTab.VexmxlDuration;
     var ParseError = (function (_super) {
         __extends(ParseError, _super);

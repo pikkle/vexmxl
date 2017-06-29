@@ -1,7 +1,7 @@
 import * as registerSuite from "intern!object";
 import * as assert from "intern/chai!assert";
-import {VexMxlTab} from "../../src/vexmxl.tab";
-import {VexMxl} from "../../src/vexmxl";
+import {VexMxlTab} from "../../vexmxl.tab";
+import {VexMxl} from "../../vexmxl";
 
 registerSuite({
 	"name": "vexmxl parse and display functions",

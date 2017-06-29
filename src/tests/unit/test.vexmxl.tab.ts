@@ -1,6 +1,6 @@
 import * as registerSuite from "intern!object";
 import * as assert from "intern/chai!assert";
-import {VexMxlTab} from "../../src/vexmxl.tab";
+import {VexMxlTab} from "../../vexmxl.tab";
 import VexmxlChord = VexMxlTab.VexmxlChord;
 import VexmxlDuration = VexMxlTab.VexmxlDuration;
 import VexmxlNote = VexMxlTab.VexmxlNote;

@@ -44,6 +44,17 @@ define(["require", "exports"], function (require, exports) {
             return VexmxlTablature;
         }());
         VexMxlTab.VexmxlTablature = VexmxlTablature;
+        var VexmxlTimeSignature = (function () {
+            function VexmxlTimeSignature(beats, beatType) {
+                this.beats = beats;
+                this.beatType = beatType;
+            }
+            VexmxlTimeSignature.prototype.toString = function () {
+                return "time=" + this.beats + "/" + this.beatType;
+            };
+            return VexmxlTimeSignature;
+        }());
+        VexMxlTab.VexmxlTimeSignature = VexmxlTimeSignature;
         var VexmxlMeasure = (function () {
             function VexmxlMeasure() {
                 this.times = [];

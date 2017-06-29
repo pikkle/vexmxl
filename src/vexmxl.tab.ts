@@ -37,6 +37,15 @@ export namespace VexMxlTab {
 
 	}
 
+	export class VexmxlTimeSignature implements VextabItem {
+		constructor(private beats: number, private beatType: number){
+
+		}
+		public toString(): string {
+			return `time=${this.beats}/${this.beatType}`;
+		}
+	}
+
 	export class VexmxlMeasure implements VextabItem {
 		private times: VexmxlTime[] = [];
 

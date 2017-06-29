@@ -1,9 +1,7 @@
 import {Attributes, Note, parseScore, ScorePart, ScoreTimewise} from "musicxml-interfaces";
-import Renderer = Vex.Flow.Renderer;
-import RuntimeError = Vex.RuntimeError;
 import {VexMxlTab} from "./vexmxl.tab";
 import VexmxlDuration = VexMxlTab.VexmxlDuration;
-
+import Renderer = Vex.Flow.Renderer;
 class ParseError extends Error {
 }
 
