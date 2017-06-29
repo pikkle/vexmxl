@@ -103,6 +103,12 @@ export namespace VexMxlTab {
 	export class VexmxlChord extends VexmxlTime {
 		private notes: VexmxlNote[] = [];
 
+		private sortNotes(): void {
+			this.notes.sort((a, b) => {
+				return b.getString() - a.getString()
+			});
+		}
+
 		public addNote(note: VexmxlNote): void {
 			if (this.hasNote(note.getString())) {
 				throw new Error("A chord can only have one note on the same string")
@@ -125,6 +131,7 @@ export namespace VexMxlTab {
 		}
 
 		protected representation(): string {
+			this.sortNotes();
 			return `(${this.notes.join(".")})`;
 		}
 
