@@ -1,6 +1,7 @@
 import {Attributes, Note, parseScore, ScorePart, ScoreTimewise} from "musicxml-interfaces";
 import {VexMxlTab} from "./vexmxl.tab";
 import VexmxlDuration = VexMxlTab.VexmxlDuration;
+import "vexflow";
 import Renderer = Vex.Flow.Renderer;
 class ParseError extends Error {
 }
@@ -49,42 +50,32 @@ export namespace VexMxl {
 	}
 
 	export function generateImage(tab: VexMxlTab.VexmxlTablature): HTMLImageElement {
-		let display = generateSVG(tab);
-
-		let svg = display.children[0];
-		let svgData = new XMLSerializer().serializeToString(svg);
-
-		let canvas = document.createElement("canvas");
-		let ctx = canvas.getContext("2d");
+		let canvas = generateCanvas(tab);
 
 		let img = document.createElement("img");
-		img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
-
-		img.onload = function () {
-			ctx.drawImage(img, 0, 0);
-			console.log(canvas.toDataURL("image/png"));
-		};
+		img.setAttribute("src", canvas.toDataURL("image/png"));
 
 		return img;
 	}
 
 
-	export function parseXML(path: string, debug: boolean = false): Promise<VexMxlTab.VexmxlTablature> {
+	export function parseXML(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<VexMxlTab.VexmxlTablature> {
 		return fetch(path)
 			.then((response: Body) => {
 				return response.text();
 			})
 			.then((score: string) => {
 				let doc: ScoreTimewise = parseScore(score);
-				if (debug) console.debug(doc);
+				console.debug(doc);
 
 				let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
 
 				// let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
 				let bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;
 
+				let title: string = "";
 				let divisions = 1; // Number of notes in measure
-				let tab = new VexMxlTab.VexmxlTablature();
+				let tab = new VexMxlTab.VexmxlTablature(title, displayTab, displayStave);
 
 				for (let docMeasure of doc.measures) {
 					let measure = new VexMxlTab.VexmxlMeasure();

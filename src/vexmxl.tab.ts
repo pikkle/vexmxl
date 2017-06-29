@@ -7,7 +7,7 @@ export namespace VexMxlTab {
 	export class VexmxlTablature implements VextabItem {
 		private measures: VexmxlMeasure[] = [];
 
-		constructor(private displaySheet: boolean = true, private scale: number = 1.0) {
+		constructor(private title: string, private displayTablature: boolean = true, private displayStave: boolean = true, private scale: number = 1.0) {
 		}
 
 		public addMeasure(measure: VexmxlMeasure): void {
@@ -16,10 +16,6 @@ export namespace VexMxlTab {
 
 		public getMeasures(): VexmxlMeasure[] {
 			return this.measures;
-		}
-
-		public displayMusicSheet(b: boolean) {
-			this.displaySheet = b;
 		}
 
 		public displayScale(ratio: number) {
@@ -31,8 +27,9 @@ export namespace VexMxlTab {
 		}
 
 		public toString(): string {
-			let options = "options width=" + this.width() + " scale=" + this.scale;
-			return options + "\ntabstave notation= " + this.displaySheet + "\n" + this.measures.join("|\n");
+			return `options width=${this.width()} scale=${this.scale}\n` +
+				`tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n` +
+				this.measures.join("|\n");
 		}
 
 	}

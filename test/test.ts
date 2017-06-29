@@ -1,11 +1,10 @@
-
-
 import {VexMxl} from "../src/vexmxl";
 
-console.log("woot");
 
-VexMxl.parseXML("../support/Back In Black.xml").then(tab => {
+VexMxl.parseXML("../support/Back In Black.xml", true, true).then(tab => {
+
 	console.log(tab);
-	let img = VexMxl.generateSVG(tab);
+	console.log(tab.toString());
+	let img = VexMxl.generateImage(tab);
 	document.getElementById("display").appendChild(img);
 });

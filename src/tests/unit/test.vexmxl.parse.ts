@@ -7,7 +7,7 @@ registerSuite({
 	"name": "vexmxl parse and display functions",
 
 	"test display": () => {
-		let tab = new VexMxlTab.VexmxlTablature(true);
+		let tab = new VexMxlTab.VexmxlTablature("");
 		VexMxl.generateSVG(tab);
 		assert.equal(true, true);
 	},
