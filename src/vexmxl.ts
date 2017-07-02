@@ -1,4 +1,4 @@
-import {Attributes, Note, parseScore, ScorePart, ScoreTimewise} from "musicxml-interfaces";
+import {Attributes, Metronome, Note, parseScore, ScorePart, ScoreTimewise, Time} from "musicxml-interfaces";
 import {VexMxlTab} from "./vexmxl.tab";
 import VexmxlDuration = VexMxlTab.VexmxlDuration;
 import "vexflow";
@@ -6,21 +6,25 @@ import Renderer = Vex.Flow.Renderer;
 class ParseError extends Error {
 }
 
-let qd = 5 + 1 / 3;
-let timeMap: { [key: number]: VexmxlDuration } = { // TODO: fix times, a half dotted is longer than a half...
-	1: VexmxlDuration.WHOLE,
-	2: VexmxlDuration.HALF,
+let timeMap: { [key: number]: VexmxlDuration } = {
+	4: VexmxlDuration.WHOLE,
 	3: VexmxlDuration.HALF_DOT,
-	4: VexmxlDuration.QUARTER,
-	8: VexmxlDuration.EIGHTH,
-	12: VexmxlDuration.EIGHTH_DOT,
-	16: VexmxlDuration.SIXTEENTH,
-	24: VexmxlDuration.SIXTEENTH_DOT,
-	32: VexmxlDuration.THIRTYSECOND,
+	2: VexmxlDuration.HALF,
+	1.5: VexmxlDuration.QUARTER_DOT,
+	1: VexmxlDuration.QUARTER,
+	0.75: VexmxlDuration.EIGHTH_DOT,
+	0.5: VexmxlDuration.EIGHTH,
+	0.375: VexmxlDuration.T16_DOT,
+	0.25: VexmxlDuration.T16,
+	0.1875: VexmxlDuration.T32_DOT,
+	0.125: VexmxlDuration.T32,
+	0.09375: VexmxlDuration.T64_DOT,
+	0.0625: VexmxlDuration.T64
 };
-timeMap[qd] = VexmxlDuration.QUARTER_DOT;
 
 export namespace VexMxl {
+
+	import VexmxlTimeSignature = VexMxlTab.VexmxlTimeSignature;
 
 	function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement, canvas: boolean): void {
 		let artist: Artist = new Artist(10, 10, 600, {scale: 0.8});
@@ -53,7 +57,7 @@ export namespace VexMxl {
 		let canvas = generateCanvas(tab);
 
 		let img = document.createElement("img");
-		img.setAttribute("src", canvas.toDataURL("image/png"));
+		img.setAttribute("src", canvas.toDataURL('image/png'));
 
 		return img;
 	}
@@ -69,14 +73,14 @@ export namespace VexMxl {
 				console.debug(doc);
 
 				let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
+				let metronome: Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
+				let times: Time = doc.measures[0].parts[partName][0].times[0];
+				let bpm = metronome.perMinute.data;
 
-				// let timeSignature: TimeSignature = new TimeSignature(doc.measures[0].parts[partName][1].divisions);
-				let bpm = doc.measures[0].parts[partName][1].directionTypes[0].metronome.perMinute.data;
-
-				let title: string = "";
+				let title: string = doc.movementTitle;
+				let time: VexmxlTimeSignature = new VexmxlTimeSignature(+times.beats[0], times.beatTypes[0]);
 				let divisions = 1; // Number of notes in measure
-				let tab = new VexMxlTab.VexmxlTablature(title, displayTab, displayStave);
-
+				let tab = new VexMxlTab.VexmxlTablature(title, time, displayTab, displayStave);
 				for (let docMeasure of doc.measures) {
 					let measure = new VexMxlTab.VexmxlMeasure();
 					let chord: VexMxlTab.VexmxlChord;
@@ -90,12 +94,14 @@ export namespace VexMxl {
 
 						} else if (elem._class === "Note") {
 							let note = elem as Note;
-							let duration = timeMap[1 / (note.duration / (divisions * 4))];
+
+							let duration = timeMap[1/divisions * note.duration];
+
 
 							if (note.rest) {
 								if (chord && chord.notEmpty()) {
 									measure.addTime(chord);
-									chord = undefined;
+									chord = undefined; // for next note
 								}
 								measure.addTime(new VexMxlTab.VexmxlRest(duration));
 
@@ -110,13 +116,17 @@ export namespace VexMxl {
 									}
 									chord = new VexMxlTab.VexmxlChord(duration);
 								}
-								chord.addNote(new VexMxlTab.VexmxlNote(tech.fret.fret, tech.string.stringNum));
+								let vNote = new VexMxlTab.VexmxlNote(tech.fret.fret, tech.string.stringNum);
+
+								if (tech.bend) {
+									vNote.bend(+tech.bend.bendAlter);
+								}
+								chord.addNote(vNote);
 							} else {
 								throw new ParseError("note has not been recognized");
 							}
 
 						}
-
 					}
 
 					if (chord && chord.notEmpty()) {
@@ -128,7 +138,6 @@ export namespace VexMxl {
 					}
 
 				}
-
 				return tab;
 			});
 	}

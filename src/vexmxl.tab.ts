@@ -1,3 +1,4 @@
+
 export namespace VexMxlTab {
 	export interface VextabItem {
 		toString(): string;
@@ -7,7 +8,11 @@ export namespace VexMxlTab {
 	export class VexmxlTablature implements VextabItem {
 		private measures: VexmxlMeasure[] = [];
 
-		constructor(private title: string, private displayTablature: boolean = true, private displayStave: boolean = true, private scale: number = 1.0) {
+		constructor(private title: string,
+		            private time: VexmxlTimeSignature,
+		            private displayTablature: boolean = true,
+		            private displayStave: boolean = true,
+		            private scale: number = 1.0) {
 		}
 
 		public addMeasure(measure: VexmxlMeasure): void {
@@ -26,9 +31,13 @@ export namespace VexMxlTab {
 			return MEASURE_LENGTH * this.measures.length;
 		}
 
+		public getMeasureLengths(): number[] {
+			return this.measures.map(m => m.sumOfTimes());
+		}
+
 		public toString(): string {
 			return `options width=${this.width()} scale=${this.scale}\n` +
-				`tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n` +
+				`tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time}\n` +
 				this.measures.join("|\n");
 		}
 
@@ -36,10 +45,10 @@ export namespace VexMxlTab {
 
 	export class VexmxlTimeSignature implements VextabItem {
 		constructor(private beats: number, private beatType: number){
-
 		}
+
 		public toString(): string {
-			return `time=${this.beats}/${this.beatType}`;
+			return `${this.beats}/${this.beatType}`;
 		}
 	}
 
@@ -54,6 +63,12 @@ export namespace VexMxlTab {
 			return this.times;
 		}
 
+		public sumOfTimes(): number {
+			return this.times
+				.map(t => t.getDuration().value())
+				.reduce((sum, current) => sum + current);
+		}
+
 		public toString(): string {
 			return "  notes " + this.times.join(" ");
 		}
@@ -63,32 +78,52 @@ export namespace VexMxlTab {
 		}
 	}
 
-	export enum VexmxlDuration {
-		WHOLE = "w",
-		HALF = "h",
-		HALF_DOT = "hd",
-		QUARTER = "q",
-		QUARTER_DOT = "qd",
-		EIGHTH = "8",
-		EIGHTH_DOT = "8d",
-		SIXTEENTH = "16",
-		SIXTEENTH_DOT = "16d",
-		THIRTYSECOND = "32"
-	}
+	export class VexmxlDuration {
+		public static WHOLE = new VexmxlDuration("whole", "w", 4);
+		public static HALF_DOT = new VexmxlDuration(undefined, "hd", 2 + 1);
+		public static HALF = new VexmxlDuration("half", "h", 2);
+		public static QUARTER_DOT = new VexmxlDuration(undefined, "qd", 1 + 1/2);
+		public static QUARTER = new VexmxlDuration("quarter", "q", 1);
+		public static EIGHTH_DOT = new VexmxlDuration(undefined, "8d", 1/2 + 1/4);
+		public static EIGHTH = new VexmxlDuration("eighth", "8", 1/2);
+		public static T16_DOT = new VexmxlDuration(undefined, "16d", 1/4 + 1/8);
+		public static T16 = new VexmxlDuration("16th", "16", 1/4);
+		public static T32_DOT= new VexmxlDuration(undefined, "32d", 1/8 + 1/16);
+		public static T32 = new VexmxlDuration("32nd", "32", 1/8);
+		public static T64_DOT = new VexmxlDuration(undefined, "64d", 1/16 + 1/32);
+		public static T64 = new VexmxlDuration("64th", "64", 1/16);
+		public static T128_DOT = new VexmxlDuration(undefined, "128d", 1/32 + 1/64);
+		public static T128 = new VexmxlDuration("128th", "128", 1/32);
 
-	export abstract class VexmxlTime implements VextabItem {
-		constructor(private duration: VexmxlDuration) {
+		private constructor(private musicxml: string, private vextab: string, private val: number) {}
+
+		public static fromMusicxml(musicxml: string): VexmxlDuration {
+			return undefined;
+		}
+
+		public value(): number {
+			return this.val;
 		}
 
 		public toString(): string {
-			return `: ${this.duration} ${this.representation()}`;
+			return this.vextab.toString();
 		}
 
-		public getDuration(): VexmxlDuration {
+	}
+
+	export abstract class VexmxlTime implements VexMxlTab.VextabItem {
+		constructor(private duration: VexMxlTab.VexmxlDuration) {
+		}
+
+		public toString(): string {
+			return `:${this.duration}${this.representation()}`;
+		}
+
+		public getDuration(): VexMxlTab.VexmxlDuration {
 			return this.duration;
 		}
 
-		public setDuration(duration: VexmxlDuration) {
+		public setDuration(duration: VexMxlTab.VexmxlDuration) {
 			this.duration = duration;
 		}
 
@@ -134,9 +169,10 @@ export namespace VexMxlTab {
 
 		public adaptPitch(modifier: number): void {
 			for (let note of this.notes) {
-				note.adaptPitch(modifier);
+				note.pitch(modifier);
 			}
 		}
+
 
 	}
 
@@ -149,7 +185,8 @@ export namespace VexMxlTab {
 	}
 
 	export class VexmxlNote implements VextabItem {
-		private modifier: number;
+		private _pitch: number;
+		private _bend: number;
 
 		constructor(private fret: number, private str: number) {
 			if (str <= 0 || str > 6) {
@@ -158,11 +195,15 @@ export namespace VexMxlTab {
 				throw new Error("A fret is in the bounds [0, 24]");
 			}
 
-			this.modifier = 0;
+			this._pitch = 0;
 		}
 
 		public toString(): string {
-			return `${(this.fret+this.modifier)}/${this.str}`;
+			let b = '';
+			if (this._bend) {
+				b = `b${this.fret+this._pitch+this._bend}`;
+			}
+			return `${(this.fret+this._pitch)}${b}/${this.str}`;
 		}
 
 		public getFret(): number {
@@ -173,9 +214,14 @@ export namespace VexMxlTab {
 			return this.str;
 		}
 
-		public adaptPitch(modifier: number): void {
-			this.modifier = modifier;
+		public pitch(modifier: number): void {
+			this._pitch = modifier;
 		}
+
+		public bend(amount: number): void {
+			this._bend = amount;
+		}
+
 	}
 
 }
