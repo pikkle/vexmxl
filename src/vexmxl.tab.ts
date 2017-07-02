@@ -15,6 +15,10 @@ export namespace VexMxlTab {
 		            private scale: number = 1.0) {
 		}
 
+		public getTitle(): string {
+			return this.title;
+		}
+
 		public addMeasure(measure: VexmxlMeasure): void {
 			this.measures.push(measure);
 		}
@@ -36,6 +40,10 @@ export namespace VexMxlTab {
 		}
 
 		public toString(): string {
+			this.measures.map(m => {
+				if (m.sumOfTimes() != this.time.getBeatType())
+					console.warn("Measure does not fulfill the time signature !");
+			});
 			return `options width=${this.width()} scale=${this.scale}\n` +
 				`tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time}\n` +
 				this.measures.join("|\n");
@@ -45,6 +53,14 @@ export namespace VexMxlTab {
 
 	export class VexmxlTimeSignature implements VextabItem {
 		constructor(private beats: number, private beatType: number){
+		}
+
+		public getBeats(): number {
+			return this.beats;
+		}
+
+		public getBeatType(): number {
+			return this.beatType;
 		}
 
 		public toString(): string {
