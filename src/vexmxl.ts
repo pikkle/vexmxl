@@ -75,12 +75,12 @@ export namespace VexMxl {
 				let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
 				let metronome: Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
 				let times: Time = doc.measures[0].parts[partName][0].times[0];
-				let bpm = metronome.perMinute.data;
+				let bpm = +metronome.perMinute.data;
 
 				let title: string = doc.movementTitle;
 				let time: VexmxlTimeSignature = new VexmxlTimeSignature(+times.beats[0], times.beatTypes[0]);
 				let divisions = 1; // Number of notes in measure
-				let tab = new VexMxlTab.VexmxlTablature(title, time, displayTab, displayStave);
+				let tab = new VexMxlTab.VexmxlTablature(title, time, bpm, displayTab, displayStave);
 				for (let docMeasure of doc.measures) {
 					let measure = new VexMxlTab.VexmxlMeasure();
 					let chord: VexMxlTab.VexmxlChord;

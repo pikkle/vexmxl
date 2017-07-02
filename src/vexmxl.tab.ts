@@ -10,6 +10,7 @@ export namespace VexMxlTab {
 
 		constructor(private title: string,
 		            private time: VexmxlTimeSignature,
+		            private bpm: number,
 		            private displayTablature: boolean = true,
 		            private displayStave: boolean = true,
 		            private scale: number = 1.0) {
@@ -17,6 +18,10 @@ export namespace VexMxlTab {
 
 		public getTitle(): string {
 			return this.title;
+		}
+
+		public getBPM(): number {
+			return this.bpm;
 		}
 
 		public addMeasure(measure: VexmxlMeasure): void {
