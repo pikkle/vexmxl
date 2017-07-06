@@ -15,12 +15,13 @@ define(["require", "exports"], function (require, exports) {
     (function (VexMxlTab) {
         var MEASURE_LENGTH = 400;
         var VexmxlTablature = (function () {
-            function VexmxlTablature(title, time, displayTablature, displayStave, scale) {
+            function VexmxlTablature(title, time, bpm, displayTablature, displayStave, scale) {
                 if (displayTablature === void 0) { displayTablature = true; }
                 if (displayStave === void 0) { displayStave = true; }
                 if (scale === void 0) { scale = 1.0; }
                 this.title = title;
                 this.time = time;
+                this.bpm = bpm;
                 this.displayTablature = displayTablature;
                 this.displayStave = displayStave;
                 this.scale = scale;
@@ -28,6 +29,9 @@ define(["require", "exports"], function (require, exports) {
             }
             VexmxlTablature.prototype.getTitle = function () {
                 return this.title;
+            };
+            VexmxlTablature.prototype.getBPM = function () {
+                return this.bpm;
             };
             VexmxlTablature.prototype.addMeasure = function (measure) {
                 this.measures.push(measure);

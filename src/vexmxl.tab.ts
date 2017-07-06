@@ -13,7 +13,7 @@ export namespace VexMxlTab {
 		            private bpm: number,
 		            private displayTablature: boolean = true,
 		            private displayStave: boolean = true,
-		            private scale: number = 1.0) {
+		            private _scale: number = 1.0) {
 		}
 
 		public getTitle(): string {
@@ -32,8 +32,8 @@ export namespace VexMxlTab {
 			return this.measures;
 		}
 
-		public displayScale(ratio: number) {
-			this.scale = ratio;
+		public scale(ratio: number) {
+			this._scale = ratio;
 		}
 
 		public width(): number {
@@ -49,7 +49,7 @@ export namespace VexMxlTab {
 				if (m.sumOfTimes() != this.time.getBeatType())
 					console.warn("Measure does not fulfill the time signature !");
 			});
-			return `options width=${this.width()} scale=${this.scale}\n` +
+			return `options width=${this.width()} scale=${this._scale}\n` +
 				`tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time}\n` +
 				this.measures.join("|\n");
 		}

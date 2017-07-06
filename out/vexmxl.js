@@ -84,11 +84,11 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
                 var partName = doc.partList[0].id; // TODO: let the part choice to the user
                 var metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
                 var times = doc.measures[0].parts[partName][0].times[0];
-                var bpm = metronome.perMinute.data;
+                var bpm = +metronome.perMinute.data;
                 var title = doc.movementTitle;
                 var time = new VexmxlTimeSignature(+times.beats[0], times.beatTypes[0]);
                 var divisions = 1; // Number of notes in measure
-                var tab = new vexmxl_tab_1.VexMxlTab.VexmxlTablature(title, time, displayTab, displayStave);
+                var tab = new vexmxl_tab_1.VexMxlTab.VexmxlTablature(title, time, bpm, displayTab, displayStave);
                 for (var _i = 0, _a = doc.measures; _i < _a.length; _i++) {
                     var docMeasure = _a[_i];
                     var measure = new vexmxl_tab_1.VexMxlTab.VexmxlMeasure();

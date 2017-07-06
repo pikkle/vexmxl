@@ -17,14 +17,23 @@ declare class Artist {
 	public NOLOGO: boolean;
 	constructor(x: number, y: number, width: number, options?: ArtistOption);
 	public render(renderer: Vex.Flow.Renderer): void;
+	public draw(renderer: Vex.Flow.Renderer): void;
+	public getNoteForFret(fret: any, string: any): any;
+	public parseBool(str: string): boolean;
+
+
 }
 
 declare class VexTab {
 	constructor(artist: Artist);
+	public reset(): void;
 	public isValid(): boolean;
 	public getArtist(): Artist;
 	public parseStaveOptions(options: any): any;
+	public parseCommand(element: any): void;
+	public parseChord(element: any): void;
 	public parse(tab: string): void;
+	public generate(): void;
 
 }
 

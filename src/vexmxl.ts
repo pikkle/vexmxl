@@ -27,7 +27,7 @@ export namespace VexMxl {
 	import VexmxlTimeSignature = VexMxlTab.VexmxlTimeSignature;
 
 	function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement, canvas: boolean): void {
-		let artist: Artist = new Artist(10, 10, 600, {scale: 0.8});
+		let artist: Artist = new Artist(0, 0, tab.width());
 		artist.NOLOGO = true;
 		let vt: VexTab = new VexTab(artist);
 		let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
@@ -41,10 +41,10 @@ export namespace VexMxl {
 		}
 	}
 
-	export function generateSVG(tab: VexMxlTab.VexmxlTablature): HTMLDivElement {
+	export function generateSVG(tab: VexMxlTab.VexmxlTablature): SVGElement {
 		let div = document.createElement("div");
 		displayTablature(tab, div, false);
-		return div;
+		return div.children[0] as SVGElement;
 	}
 
 	export function generateCanvas(tab: VexMxlTab.VexmxlTablature): HTMLCanvasElement {
@@ -54,12 +54,13 @@ export namespace VexMxl {
 	}
 
 	export function generateImage(tab: VexMxlTab.VexmxlTablature): HTMLImageElement {
-		let canvas = generateCanvas(tab);
+        let svg = generateSVG(tab);
+        let svgData = new XMLSerializer().serializeToString( svg );
+        let data = "data:image/svg+xml;base64," + btoa(svgData);
+        let img = document.createElement("img");
 
-		let img = document.createElement("img");
-		img.setAttribute("src", canvas.toDataURL('image/png'));
-
-		return img;
+        img.setAttribute('src', data);
+        return img;
 	}
 
 

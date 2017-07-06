@@ -5,12 +5,14 @@ export declare namespace VexMxlTab {
     class VexmxlTablature implements VextabItem {
         private title;
         private time;
+        private bpm;
         private displayTablature;
         private displayStave;
         private scale;
         private measures;
-        constructor(title: string, time: VexmxlTimeSignature, displayTablature?: boolean, displayStave?: boolean, scale?: number);
+        constructor(title: string, time: VexmxlTimeSignature, bpm: number, displayTablature?: boolean, displayStave?: boolean, scale?: number);
         getTitle(): string;
+        getBPM(): number;
         addMeasure(measure: VexmxlMeasure): void;
         getMeasures(): VexmxlMeasure[];
         displayScale(ratio: number): void;
