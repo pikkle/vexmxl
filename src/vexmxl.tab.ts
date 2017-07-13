@@ -144,8 +144,9 @@ export abstract class Time implements Item {
         this.duration = duration;
     }
 
-    public adaptPitch(modifier: number): void {
-    };
+    public abstract isChord(); // Kind of dirty...
+
+    public abstract adaptPitch(modifier: number): void;
 
     protected abstract representation(): string;
 }
@@ -191,15 +192,26 @@ export class Chord extends Time {
         }
     }
 
+	public isChord() {
+		return true;
+	}
+
 
 }
 
 export class Rest extends Time {
 
-    protected representation(): string {
+	protected representation(): string {
         return "##";
     }
 
+	public adaptPitch(modifier: number): void {
+		// Do nothing
+	}
+
+	public isChord() {
+		return false;
+	}
 }
 
 export class Note implements Item {
