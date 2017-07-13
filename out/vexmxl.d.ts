@@ -1,8 +1,8 @@
-import { VexMxlTab } from "./vexmxl.tab";
 import "vexflow";
+import { Tablature } from "./vexmxl.tab";
 export declare namespace VexMxl {
-    function generateSVG(tab: VexMxlTab.VexmxlTablature): SVGElement;
-    function generateCanvas(tab: VexMxlTab.VexmxlTablature): HTMLCanvasElement;
-    function generateImage(tab: VexMxlTab.VexmxlTablature): HTMLImageElement;
-    function parseXML(path: string, displayTab?: boolean, displayStave?: boolean): Promise<VexMxlTab.VexmxlTablature>;
+    function generateSVG(tab: Tablature): SVGElement;
+    function generateCanvas(tab: Tablature): HTMLCanvasElement;
+    function generateImage(tab: Tablature): HTMLImageElement;
+    function parseXML(path: string, displayTab?: boolean, displayStave?: boolean): Promise<Tablature>;
 }

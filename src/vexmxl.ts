@@ -3,7 +3,8 @@ import "vexflow";
 import Renderer = Vex.Flow.Renderer;
 import {Tablature, TimeSignature, Chord, Duration, Measure, Note, Rest} from "./vexmxl.tab";
 
-class ParseError extends Error {}
+class ParseError extends Error {
+}
 
 let timeMap: { [key: number]: Duration } = {
 	4: Duration.WHOLE,
@@ -21,120 +22,117 @@ let timeMap: { [key: number]: Duration } = {
 	0.0625: Duration.T64
 };
 
-export namespace VexMxl {
+function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): void {
+	let artist: Artist = new Artist(0, 0, tab.width());
+	let vt: VexTab = new VexTab(artist);
+	let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
+	let parsed = tab.toString();
 
-	function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): void {
-		let artist: Artist = new Artist(0, 0, tab.width());
-		let vt: VexTab = new VexTab(artist);
-		let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
-		let parsed = tab.toString();
-
-		try {
-			vt.parse(parsed);
-			artist.render(renderer);
-		} catch (e) {
-			console.error(e);
-		}
+	try {
+		vt.parse(parsed);
+		artist.render(renderer);
+	} catch (e) {
+		console.error(e);
 	}
+}
 
-	export function generateSVG(tab: Tablature): SVGElement {
-		let div = document.createElement("div");
-		displayTablature(tab, div, false);
-		return div.children[0] as SVGElement;
-	}
+export function generateSVG(tab: Tablature): SVGElement {
+	let div = document.createElement("div");
+	displayTablature(tab, div, false);
+	return div.children[0] as SVGElement;
+}
 
-	export function generateCanvas(tab: Tablature): HTMLCanvasElement {
-		let canvas = document.createElement("canvas");
-		console.warn("Canvas size is limited, e.g. Chrome's canvas can only be 32,767x32,767 pixels. " +
-			"If it exceeds, nothing will be displayed.");
-		displayTablature(tab, canvas, true);
-		return canvas;
-	}
+export function generateCanvas(tab: Tablature): HTMLCanvasElement {
+	let canvas = document.createElement("canvas");
+	console.warn("Canvas size is limited, e.g. Chrome's canvas can only be 32,767x32,767 pixels. " +
+		"If it exceeds, nothing will be displayed.");
+	displayTablature(tab, canvas, true);
+	return canvas;
+}
 
-	export function generateImage(tab: Tablature): HTMLImageElement {
-		let svg = generateSVG(tab); // uses SVG rendering instead of canvas because of size limitations
-		let svgData = new XMLSerializer().serializeToString(svg);
-		let data = "data:image/svg+xml;base64," + btoa(svgData);
-		let img = document.createElement("img");
+export function generateImage(tab: Tablature): HTMLImageElement {
+	let svg = generateSVG(tab); // uses SVG rendering instead of canvas because of size limitations
+	let svgData = new XMLSerializer().serializeToString(svg);
+	let data = "data:image/svg+xml;base64," + btoa(svgData);
+	let img = document.createElement("img");
 
-		img.setAttribute('src', data);
-		return img;
-	}
+	img.setAttribute('src', data);
+	return img;
+}
 
 
-	export function parseXML(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<Tablature> {
-		return fetch(path)
-			.then((response: Body) => {
-				return response.text();
-			})
-			.then((score: string) => {
-				let doc: mxl.ScoreTimewise = mxl.parseScore(score);
-				console.debug(doc);
+export function parseXML(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<Tablature> {
+	return fetch(path)
+		.then((response: Body) => {
+			return response.text();
+		})
+		.then((score: string) => {
+			let doc: mxl.ScoreTimewise = mxl.parseScore(score);
+			console.debug(doc);
 
-				let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
-				let metronome: mxl.Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
-				let times: mxl.Time = doc.measures[0].parts[partName][0].times[0];
-				let bpm = +metronome.perMinute.data;
+			let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
+			let metronome: mxl.Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
+			let times: mxl.Time = doc.measures[0].parts[partName][0].times[0];
+			let bpm = +metronome.perMinute.data;
 
-				let title: string = doc.movementTitle;
-				let time = new TimeSignature(+times.beats[0], times.beatTypes[0]);
-				let divisions = 1; // Number of notes in measure
-				let tab = new Tablature(title, time, bpm, displayTab, displayStave);
-				for (let docMeasure of doc.measures) {
-					let measure = new Measure();
-					let chord: Chord;
+			let title: string = doc.movementTitle;
+			let time = new TimeSignature(+times.beats[0], times.beatTypes[0]);
+			let divisions = 1; // Number of notes in measure
+			let tab = new Tablature(title, time, bpm, displayTab, displayStave);
+			for (let docMeasure of doc.measures) {
+				let measure = new Measure();
+				let chord: Chord;
 
-					for (let elem of docMeasure.parts[partName]) {
-						if (elem._class === "Attributes") {
-							let attributes = elem as mxl.Attributes;
-							if (attributes.divisions) {
-								divisions = attributes.divisions;
+				for (let elem of docMeasure.parts[partName]) {
+					if (elem._class === "Attributes") {
+						let attributes = elem as mxl.Attributes;
+						if (attributes.divisions) {
+							divisions = attributes.divisions;
+						}
+
+					} else if (elem._class === "Note") {
+						let note = elem as mxl.Note;
+						let duration = timeMap[1 / divisions * note.duration];
+						if (note.rest) {
+							if (chord && chord.notEmpty()) {
+								measure.addTime(chord);
+								chord = undefined; // for next note
 							}
+							measure.addTime(new Rest(duration));
 
-						} else if (elem._class === "Note") {
-							let note = elem as mxl.Note;
-							let duration = timeMap[1 / divisions * note.duration];
-							if (note.rest) {
+						} else if (note.pitch) {
+							let tech = note.notations[0].technicals[0];
+
+							if (note.chord) {
+								if (!chord) throw new ParseError("Chord element has not been initialized properly");
+							} else {
 								if (chord && chord.notEmpty()) {
 									measure.addTime(chord);
-									chord = undefined; // for next note
 								}
-								measure.addTime(new Rest(duration));
-
-							} else if (note.pitch) {
-								let tech = note.notations[0].technicals[0];
-
-								if (note.chord) {
-									if (!chord) throw new ParseError("Chord element has not been initialized properly");
-								} else {
-									if (chord && chord.notEmpty()) {
-										measure.addTime(chord);
-									}
-									chord = new Chord(duration);
-								}
-								let vNote = new Note(tech.fret.fret, tech.string.stringNum);
-
-								if (tech.bend) {
-									vNote.bend(+tech.bend.bendAlter);
-								}
-								chord.addNote(vNote);
-							} else {
-								throw new ParseError("note has not been recognized");
+								chord = new Chord(duration);
 							}
+							let vNote = new Note(tech.fret.fret, tech.string.stringNum);
 
+							if (tech.bend) {
+								vNote.bend(+tech.bend.bendAlter);
+							}
+							chord.addNote(vNote);
+						} else {
+							throw new ParseError("note has not been recognized");
 						}
-					}
 
-					if (chord && chord.notEmpty()) {
-						measure.addTime(chord);
 					}
-
-					if (measure.notEmpty()) {
-						tab.addMeasure(measure);
-					}
-
 				}
-				return tab;
-			});
-	}
+
+				if (chord && chord.notEmpty()) {
+					measure.addTime(chord);
+				}
+
+				if (measure.notEmpty()) {
+					tab.addMeasure(measure);
+				}
+
+			}
+			return tab;
+		});
 }
