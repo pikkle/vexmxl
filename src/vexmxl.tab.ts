@@ -144,7 +144,7 @@ export abstract class Time implements Item {
         this.duration = duration;
     }
 
-    public abstract isChord(); // Kind of dirty...
+    public abstract isChord(): boolean; // Kind of dirty...
 
     public abstract adaptPitch(modifier: number): void;
 
