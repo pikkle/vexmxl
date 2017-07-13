@@ -15,16 +15,16 @@ define(["require", "exports"], function (require, exports) {
     (function (VexMxlTab) {
         var MEASURE_LENGTH = 400;
         var VexmxlTablature = (function () {
-            function VexmxlTablature(title, time, bpm, displayTablature, displayStave, scale) {
+            function VexmxlTablature(title, time, bpm, displayTablature, displayStave, _scale) {
                 if (displayTablature === void 0) { displayTablature = true; }
                 if (displayStave === void 0) { displayStave = true; }
-                if (scale === void 0) { scale = 1.0; }
+                if (_scale === void 0) { _scale = 1.0; }
                 this.title = title;
                 this.time = time;
                 this.bpm = bpm;
                 this.displayTablature = displayTablature;
                 this.displayStave = displayStave;
-                this.scale = scale;
+                this._scale = _scale;
                 this.measures = [];
             }
             VexmxlTablature.prototype.getTitle = function () {
@@ -39,8 +39,8 @@ define(["require", "exports"], function (require, exports) {
             VexmxlTablature.prototype.getMeasures = function () {
                 return this.measures;
             };
-            VexmxlTablature.prototype.displayScale = function (ratio) {
-                this.scale = ratio;
+            VexmxlTablature.prototype.scale = function (ratio) {
+                this._scale = ratio;
             };
             VexmxlTablature.prototype.width = function () {
                 return MEASURE_LENGTH * this.measures.length;
@@ -54,7 +54,7 @@ define(["require", "exports"], function (require, exports) {
                     if (m.sumOfTimes() != _this.time.getBeatType())
                         console.warn("Measure does not fulfill the time signature !");
                 });
-                return "options width=" + this.width() + " scale=" + this.scale + "\n" +
+                return "options width=" + this.width() + " scale=" + this._scale + "\n" +
                     ("tabstave notation=" + this.displayStave + " tablature=" + this.displayTablature + "\n time=" + this.time + "\n") +
                     this.measures.join("|\n");
             };

@@ -39,13 +39,13 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
     (function (VexMxl) {
         var VexmxlTimeSignature = vexmxl_tab_1.VexMxlTab.VexmxlTimeSignature;
         function displayTablature(tab, div, canvas) {
-            var artist = new Artist(10, 10, 600, { scale: 0.8 });
-            artist.NOLOGO = true;
+            var artist = new Artist(0, 0, tab.width());
             var vt = new VexTab(artist);
             var renderer = new Renderer(div, canvas ? 1 /* CANVAS */ : 3 /* SVG */);
             var parsed = tab.toString();
             try {
                 vt.parse(parsed);
+                console.log(vt);
                 artist.render(renderer);
             }
             catch (e) {
@@ -55,7 +55,7 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         function generateSVG(tab) {
             var div = document.createElement("div");
             displayTablature(tab, div, false);
-            return div;
+            return div.children[0];
         }
         VexMxl.generateSVG = generateSVG;
         function generateCanvas(tab) {
@@ -65,9 +65,11 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         }
         VexMxl.generateCanvas = generateCanvas;
         function generateImage(tab) {
-            var canvas = generateCanvas(tab);
+            var svg = generateSVG(tab);
+            var svgData = new XMLSerializer().serializeToString(svg);
+            var data = "data:image/svg+xml;base64," + btoa(svgData);
             var img = document.createElement("img");
-            img.setAttribute("src", canvas.toDataURL('image/png'));
+            img.setAttribute('src', data);
             return img;
         }
         VexMxl.generateImage = generateImage;

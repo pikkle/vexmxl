@@ -8,14 +8,14 @@ export declare namespace VexMxlTab {
         private bpm;
         private displayTablature;
         private displayStave;
-        private scale;
+        private _scale;
         private measures;
-        constructor(title: string, time: VexmxlTimeSignature, bpm: number, displayTablature?: boolean, displayStave?: boolean, scale?: number);
+        constructor(title: string, time: VexmxlTimeSignature, bpm: number, displayTablature?: boolean, displayStave?: boolean, _scale?: number);
         getTitle(): string;
         getBPM(): number;
         addMeasure(measure: VexmxlMeasure): void;
         getMeasures(): VexmxlMeasure[];
-        displayScale(ratio: number): void;
+        scale(ratio: number): void;
         width(): number;
         getMeasureLengths(): number[];
         toString(): string;

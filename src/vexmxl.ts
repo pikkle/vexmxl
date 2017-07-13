@@ -1,34 +1,30 @@
-import {Attributes, Metronome, Note, parseScore, ScorePart, ScoreTimewise, Time} from "musicxml-interfaces";
-import {VexMxlTab} from "./vexmxl.tab";
-import VexmxlDuration = VexMxlTab.VexmxlDuration;
+import * as mxl from "musicxml-interfaces";
 import "vexflow";
 import Renderer = Vex.Flow.Renderer;
-class ParseError extends Error {
-}
+import {Tablature, TimeSignature, Chord, Duration, Measure, Note, Rest} from "./vexmxl.tab";
 
-let timeMap: { [key: number]: VexmxlDuration } = {
-	4: VexmxlDuration.WHOLE,
-	3: VexmxlDuration.HALF_DOT,
-	2: VexmxlDuration.HALF,
-	1.5: VexmxlDuration.QUARTER_DOT,
-	1: VexmxlDuration.QUARTER,
-	0.75: VexmxlDuration.EIGHTH_DOT,
-	0.5: VexmxlDuration.EIGHTH,
-	0.375: VexmxlDuration.T16_DOT,
-	0.25: VexmxlDuration.T16,
-	0.1875: VexmxlDuration.T32_DOT,
-	0.125: VexmxlDuration.T32,
-	0.09375: VexmxlDuration.T64_DOT,
-	0.0625: VexmxlDuration.T64
+class ParseError extends Error {}
+
+let timeMap: { [key: number]: Duration } = {
+	4: Duration.WHOLE,
+	3: Duration.HALF_DOT,
+	2: Duration.HALF,
+	1.5: Duration.QUARTER_DOT,
+	1: Duration.QUARTER,
+	0.75: Duration.EIGHTH_DOT,
+	0.5: Duration.EIGHTH,
+	0.375: Duration.T16_DOT,
+	0.25: Duration.T16,
+	0.1875: Duration.T32_DOT,
+	0.125: Duration.T32,
+	0.09375: Duration.T64_DOT,
+	0.0625: Duration.T64
 };
 
 export namespace VexMxl {
 
-	import VexmxlTimeSignature = VexMxlTab.VexmxlTimeSignature;
-
-	function displayTablature(tab: VexMxlTab.VexmxlTablature, div: HTMLElement, canvas: boolean): void {
+	function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): void {
 		let artist: Artist = new Artist(0, 0, tab.width());
-		artist.NOLOGO = true;
 		let vt: VexTab = new VexTab(artist);
 		let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
 		let parsed = tab.toString();
@@ -41,70 +37,69 @@ export namespace VexMxl {
 		}
 	}
 
-	export function generateSVG(tab: VexMxlTab.VexmxlTablature): SVGElement {
+	export function generateSVG(tab: Tablature): SVGElement {
 		let div = document.createElement("div");
 		displayTablature(tab, div, false);
 		return div.children[0] as SVGElement;
 	}
 
-	export function generateCanvas(tab: VexMxlTab.VexmxlTablature): HTMLCanvasElement {
+	export function generateCanvas(tab: Tablature): HTMLCanvasElement {
 		let canvas = document.createElement("canvas");
+		console.warn("Canvas size is limited, e.g. Chrome's canvas can only be 32,767x32,767 pixels. " +
+			"If it exceeds, nothing will be displayed.");
 		displayTablature(tab, canvas, true);
 		return canvas;
 	}
 
-	export function generateImage(tab: VexMxlTab.VexmxlTablature): HTMLImageElement {
-        let svg = generateSVG(tab);
-        let svgData = new XMLSerializer().serializeToString( svg );
-        let data = "data:image/svg+xml;base64," + btoa(svgData);
-        let img = document.createElement("img");
+	export function generateImage(tab: Tablature): HTMLImageElement {
+		let svg = generateSVG(tab); // uses SVG rendering instead of canvas because of size limitations
+		let svgData = new XMLSerializer().serializeToString(svg);
+		let data = "data:image/svg+xml;base64," + btoa(svgData);
+		let img = document.createElement("img");
 
-        img.setAttribute('src', data);
-        return img;
+		img.setAttribute('src', data);
+		return img;
 	}
 
 
-	export function parseXML(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<VexMxlTab.VexmxlTablature> {
+	export function parseXML(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<Tablature> {
 		return fetch(path)
 			.then((response: Body) => {
 				return response.text();
 			})
 			.then((score: string) => {
-				let doc: ScoreTimewise = parseScore(score);
+				let doc: mxl.ScoreTimewise = mxl.parseScore(score);
 				console.debug(doc);
 
-				let partName: string = (doc.partList[0] as ScorePart).id; // TODO: let the part choice to the user
-				let metronome: Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
-				let times: Time = doc.measures[0].parts[partName][0].times[0];
+				let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
+				let metronome: mxl.Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
+				let times: mxl.Time = doc.measures[0].parts[partName][0].times[0];
 				let bpm = +metronome.perMinute.data;
 
 				let title: string = doc.movementTitle;
-				let time: VexmxlTimeSignature = new VexmxlTimeSignature(+times.beats[0], times.beatTypes[0]);
+				let time = new TimeSignature(+times.beats[0], times.beatTypes[0]);
 				let divisions = 1; // Number of notes in measure
-				let tab = new VexMxlTab.VexmxlTablature(title, time, bpm, displayTab, displayStave);
+				let tab = new Tablature(title, time, bpm, displayTab, displayStave);
 				for (let docMeasure of doc.measures) {
-					let measure = new VexMxlTab.VexmxlMeasure();
-					let chord: VexMxlTab.VexmxlChord;
+					let measure = new Measure();
+					let chord: Chord;
 
 					for (let elem of docMeasure.parts[partName]) {
 						if (elem._class === "Attributes") {
-							let attributes = elem as Attributes;
+							let attributes = elem as mxl.Attributes;
 							if (attributes.divisions) {
 								divisions = attributes.divisions;
 							}
 
 						} else if (elem._class === "Note") {
-							let note = elem as Note;
-
-							let duration = timeMap[1/divisions * note.duration];
-
-
+							let note = elem as mxl.Note;
+							let duration = timeMap[1 / divisions * note.duration];
 							if (note.rest) {
 								if (chord && chord.notEmpty()) {
 									measure.addTime(chord);
 									chord = undefined; // for next note
 								}
-								measure.addTime(new VexMxlTab.VexmxlRest(duration));
+								measure.addTime(new Rest(duration));
 
 							} else if (note.pitch) {
 								let tech = note.notations[0].technicals[0];
@@ -115,9 +110,9 @@ export namespace VexMxl {
 									if (chord && chord.notEmpty()) {
 										measure.addTime(chord);
 									}
-									chord = new VexMxlTab.VexmxlChord(duration);
+									chord = new Chord(duration);
 								}
-								let vNote = new VexMxlTab.VexmxlNote(tech.fret.fret, tech.string.stringNum);
+								let vNote = new Note(tech.fret.fret, tech.string.stringNum);
 
 								if (tech.bend) {
 									vNote.bend(+tech.bend.bendAlter);
