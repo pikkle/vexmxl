@@ -23,6 +23,10 @@ export class Tablature implements Item {
         return this.bpm;
     }
 
+    public getTimeSignature(): TimeSignature {
+        return this.time;
+    }
+
     public addMeasure(measure: Measure): void {
         this.measures.push(measure);
     }
@@ -144,7 +148,7 @@ export abstract class Time implements Item {
         this.duration = duration;
     }
 
-    public abstract isChord(): boolean; // Kind of dirty...
+    public abstract isChord(): boolean; // Kind of dirty, but a nice compromise on broken instanceof of Typescript on imported type definitions
 
     public abstract adaptPitch(modifier: number): void;
 
@@ -195,7 +199,6 @@ export class Chord extends Time {
 	public isChord() {
 		return true;
 	}
-
 
 }
 

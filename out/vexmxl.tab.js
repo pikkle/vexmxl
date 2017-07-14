@@ -143,9 +143,6 @@ define(["require", "exports"], function (require, exports) {
         Time.prototype.setDuration = function (duration) {
             this.duration = duration;
         };
-        Time.prototype.adaptPitch = function (modifier) {
-        };
-        ;
         return Time;
     }());
     exports.Time = Time;
@@ -192,6 +189,9 @@ define(["require", "exports"], function (require, exports) {
                 note.pitch(modifier);
             }
         };
+        Chord.prototype.isChord = function () {
+            return true;
+        };
         return Chord;
     }(Time));
     exports.Chord = Chord;
@@ -202,6 +202,12 @@ define(["require", "exports"], function (require, exports) {
         }
         Rest.prototype.representation = function () {
             return "##";
+        };
+        Rest.prototype.adaptPitch = function (modifier) {
+            // Do nothing
+        };
+        Rest.prototype.isChord = function () {
+            return false;
         };
         return Rest;
     }(Time));

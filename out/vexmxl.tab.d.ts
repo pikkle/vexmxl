@@ -64,7 +64,8 @@ export declare abstract class Time implements Item {
     toString(): string;
     getDuration(): Duration;
     setDuration(duration: Duration): void;
-    adaptPitch(modifier: number): void;
+    abstract isChord(): boolean;
+    abstract adaptPitch(modifier: number): void;
     protected abstract representation(): string;
 }
 export declare class Chord extends Time {
@@ -76,9 +77,12 @@ export declare class Chord extends Time {
     notEmpty(): boolean;
     protected representation(): string;
     adaptPitch(modifier: number): void;
+    isChord(): boolean;
 }
 export declare class Rest extends Time {
     protected representation(): string;
+    adaptPitch(modifier: number): void;
+    isChord(): boolean;
 }
 export declare class Note implements Item {
     private fret;
