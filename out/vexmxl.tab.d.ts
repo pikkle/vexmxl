@@ -12,6 +12,7 @@ export declare class Tablature implements Item {
     constructor(title: string, time: TimeSignature, bpm: number, displayTablature?: boolean, displayStave?: boolean, _scale?: number);
     getTitle(): string;
     getBPM(): number;
+    getTimeSignature(): TimeSignature;
     addMeasure(measure: Measure): void;
     getMeasures(): Measure[];
     scale(ratio: number): void;

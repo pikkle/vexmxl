@@ -31,6 +31,9 @@ define(["require", "exports"], function (require, exports) {
         Tablature.prototype.getBPM = function () {
             return this.bpm;
         };
+        Tablature.prototype.getTimeSignature = function () {
+            return this.time;
+        };
         Tablature.prototype.addMeasure = function (measure) {
             this.measures.push(measure);
         };

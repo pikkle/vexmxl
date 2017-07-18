@@ -3,6 +3,7 @@ export interface Item {
 }
 
 const MEASURE_LENGTH: number = 400;
+let vextab = new Artist(0, 0, 1);
 
 export class Tablature implements Item {
     private measures: Measure[] = [];
@@ -262,6 +263,12 @@ export class Note implements Item {
 
     public hasBend(): boolean {
         return this._bend > 0;
+    }
+
+    public hasSharp(): boolean {
+	    let wrap: any[] = vextab.getNoteForFret(this.fret, this.str);
+	    let note: string = wrap[0];
+        return note.indexOf("#") > 0;
     }
 
 }
