@@ -193,7 +193,7 @@ export class Chord extends Time {
 
     public adaptPitch(modifier: number): void {
         for (let note of this.notes) {
-            note.pitch(modifier);
+            note.setPitch(modifier);
         }
     }
 
@@ -236,9 +236,9 @@ export class Note implements Item {
     public toString(): string {
         let b = '';
         if (this._bend > 0) {
-            b = `b${this.fret + this._pitch + this._bend}`;
+            b = `b${this.fret + this._bend}`;
         }
-        return `${(this.fret + this._pitch)}${b}/${this.str}`;
+        return `${(this.fret)}${b}/${this.str}`;
     }
 
     public getFret(): number {
@@ -249,8 +249,12 @@ export class Note implements Item {
         return this.str;
     }
 
-    public pitch(modifier: number): void {
+    public setPitch(modifier: number): void {
         this._pitch = modifier;
+    }
+
+    public getPitch(): number {
+    	return this._pitch;
     }
 
     public bend(amount: number): void {

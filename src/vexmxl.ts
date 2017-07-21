@@ -60,79 +60,88 @@ export function generateImage(tab: Tablature): HTMLImageElement {
 	return img;
 }
 
+function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Promise<Tablature> {
+	return Promise.resolve(xml).then((score: string) => {
+		let doc: mxl.ScoreTimewise = mxl.parseScore(score);
+		console.debug(doc);
 
-export function parseXML(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<Tablature> {
-	return fetch(path)
-		.then((response: Body) => {
-			return response.text();
-		})
-		.then((score: string) => {
-			let doc: mxl.ScoreTimewise = mxl.parseScore(score);
-			console.debug(doc);
+		let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
+		let metronome: mxl.Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
+		let times: mxl.Time = doc.measures[0].parts[partName][0].times[0];
+		let bpm = +metronome.perMinute.data;
 
-			let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
-			let metronome: mxl.Metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
-			let times: mxl.Time = doc.measures[0].parts[partName][0].times[0];
-			let bpm = +metronome.perMinute.data;
+		let title: string = doc.movementTitle;
+		let time = new TimeSignature(+times.beats[0], times.beatTypes[0]);
+		let divisions = 1; // Number of notes in measure
+		let tab = new Tablature(title, time, bpm, displayTab, displayStave);
+		for (let docMeasure of doc.measures) {
+			let measure = new Measure();
+			let chord: Chord;
 
-			let title: string = doc.movementTitle;
-			let time = new TimeSignature(+times.beats[0], times.beatTypes[0]);
-			let divisions = 1; // Number of notes in measure
-			let tab = new Tablature(title, time, bpm, displayTab, displayStave);
-			for (let docMeasure of doc.measures) {
-				let measure = new Measure();
-				let chord: Chord;
+			for (let elem of docMeasure.parts[partName]) {
+				if (elem._class === "Attributes") {
+					let attributes = elem as mxl.Attributes;
+					if (attributes.divisions) {
+						divisions = attributes.divisions;
+					}
 
-				for (let elem of docMeasure.parts[partName]) {
-					if (elem._class === "Attributes") {
-						let attributes = elem as mxl.Attributes;
-						if (attributes.divisions) {
-							divisions = attributes.divisions;
+				} else if (elem._class === "Note") {
+					let note = elem as mxl.Note;
+					let duration = timeMap[1 / divisions * note.duration];
+					if (note.rest) {
+						if (chord && chord.notEmpty()) {
+							measure.addTime(chord);
+							chord = undefined; // for next note
 						}
+						measure.addTime(new Rest(duration));
 
-					} else if (elem._class === "Note") {
-						let note = elem as mxl.Note;
-						let duration = timeMap[1 / divisions * note.duration];
-						if (note.rest) {
+					} else if (note.pitch) {
+						let tech = note.notations[0].technicals[0];
+
+						if (note.chord) {
+							if (!chord) throw new ParseError("Chord element has not been initialized properly");
+						} else {
 							if (chord && chord.notEmpty()) {
 								measure.addTime(chord);
-								chord = undefined; // for next note
 							}
-							measure.addTime(new Rest(duration));
-
-						} else if (note.pitch) {
-							let tech = note.notations[0].technicals[0];
-
-							if (note.chord) {
-								if (!chord) throw new ParseError("Chord element has not been initialized properly");
-							} else {
-								if (chord && chord.notEmpty()) {
-									measure.addTime(chord);
-								}
-								chord = new Chord(duration);
-							}
-							let vNote = new Note(tech.fret.fret, tech.string.stringNum);
-
-							if (tech.bend) {
-								vNote.bend(+tech.bend.bendAlter);
-							}
-							chord.addNote(vNote);
-						} else {
-							throw new ParseError("note has not been recognized");
+							chord = new Chord(duration);
 						}
+						let vNote = new Note(tech.fret.fret, tech.string.stringNum);
 
+						if (tech.bend) {
+							vNote.bend(+tech.bend.bendAlter);
+						}
+						chord.addNote(vNote);
+					} else {
+						throw new ParseError("note has not been recognized");
 					}
-				}
 
-				if (chord && chord.notEmpty()) {
-					measure.addTime(chord);
 				}
-
-				if (measure.notEmpty()) {
-					tab.addMeasure(measure);
-				}
-
 			}
-			return tab;
-		});
+
+			if (chord && chord.notEmpty()) {
+				measure.addTime(chord);
+			}
+
+			if (measure.notEmpty()) {
+				tab.addMeasure(measure);
+			}
+
+		}
+		return tab;
+	});
+}
+
+export function parseXMLFromString(xml: string, displayTab: boolean = true, displayStave: boolean = true): Promise<Tablature> {
+	return Promise.resolve(xml).then(str => {
+		return parseXML(str, displayTab, displayStave);
+	});
+}
+
+export function parseXMLFromFile(path: string, displayTab: boolean = true, displayStave: boolean = true): Promise<Tablature> {
+	return fetch(path).then((response: Body) => {
+		return response.text();
+	}).then(str => {
+		return parseXML(str, displayTab, displayStave);
+	});
 }

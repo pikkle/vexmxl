@@ -7,15 +7,19 @@ This project will eventually be able to read MusicXML on both MXL and XML file e
 Types for typescript is already given in the output ! You simple have to import the project with npm :)
 
 ## Usage
+This package
+
+
 Install the package using npm:
 ```
 npm install vexmxl
 ```
 
-Parse your XML and display the computed tablature:
+Parse your XML and display the computed tablature (here in typescript):
 ```
-VexMxl.parseXML("Back In Black.xml").then(tab => {
-    VexMxl.displayTablature(tab, document.getElementById("display"))
+parseXMLFromFile("Back In Black.xml").then(tab => {
+    let img = generateImage(tab);
+    document.getElementById("display").appendChild(img);
 });
 ```
 

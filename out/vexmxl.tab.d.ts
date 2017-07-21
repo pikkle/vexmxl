@@ -94,7 +94,9 @@ export declare class Note implements Item {
     toString(): string;
     getFret(): number;
     getString(): number;
-    pitch(modifier: number): void;
+    setPitch(modifier: number): void;
+    getPitch(): number;
     bend(amount: number): void;
     hasBend(): boolean;
+    hasSharp(): boolean;
 }

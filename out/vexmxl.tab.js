@@ -1,22 +1,10 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var MEASURE_LENGTH = 400;
-    var Tablature = (function () {
-        function Tablature(title, time, bpm, displayTablature, displayStave, _scale) {
-            if (displayTablature === void 0) { displayTablature = true; }
-            if (displayStave === void 0) { displayStave = true; }
-            if (_scale === void 0) { _scale = 1.0; }
+    const MEASURE_LENGTH = 400;
+    let vextab = new Artist(0, 0, 1);
+    class Tablature {
+        constructor(title, time, bpm, displayTablature = true, displayStave = true, _scale = 1.0) {
             this.title = title;
             this.time = time;
             this.bpm = bpm;
@@ -25,198 +13,182 @@ define(["require", "exports"], function (require, exports) {
             this._scale = _scale;
             this.measures = [];
         }
-        Tablature.prototype.getTitle = function () {
+        getTitle() {
             return this.title;
-        };
-        Tablature.prototype.getBPM = function () {
+        }
+        getBPM() {
             return this.bpm;
-        };
-        Tablature.prototype.getTimeSignature = function () {
+        }
+        getTimeSignature() {
             return this.time;
-        };
-        Tablature.prototype.addMeasure = function (measure) {
+        }
+        addMeasure(measure) {
             this.measures.push(measure);
-        };
-        Tablature.prototype.getMeasures = function () {
+        }
+        getMeasures() {
             return this.measures;
-        };
-        Tablature.prototype.scale = function (ratio) {
+        }
+        scale(ratio) {
             this._scale = ratio;
-        };
-        Tablature.prototype.width = function () {
+        }
+        width() {
             return MEASURE_LENGTH * this.measures.length;
-        };
-        Tablature.prototype.getMeasureLengths = function () {
-            return this.measures.map(function (m) { return m.sumOfTimes(); });
-        };
-        Tablature.prototype.toString = function () {
-            var _this = this;
-            this.measures.map(function (m) {
-                if (m.sumOfTimes() != _this.time.getBeatType())
+        }
+        getMeasureLengths() {
+            return this.measures.map(m => m.sumOfTimes());
+        }
+        toString() {
+            this.measures.map(m => {
+                if (m.sumOfTimes() != this.time.getBeatType())
                     console.warn("Measure does not fulfill the time signature !");
             });
-            return "options width=" + this.width() + " scale=" + this._scale + "\n" +
-                ("tabstave notation=" + this.displayStave + " tablature=" + this.displayTablature + "\n time=" + this.time + "\n") +
+            return `options width=${this.width()} scale=${this._scale}\n` +
+                `tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time}\n` +
                 this.measures.join("|\n");
-        };
-        return Tablature;
-    }());
+        }
+    }
     exports.Tablature = Tablature;
-    var TimeSignature = (function () {
-        function TimeSignature(beats, beatType) {
+    class TimeSignature {
+        constructor(beats, beatType) {
             this.beats = beats;
             this.beatType = beatType;
         }
-        TimeSignature.prototype.getBeats = function () {
+        getBeats() {
             return this.beats;
-        };
-        TimeSignature.prototype.getBeatType = function () {
+        }
+        getBeatType() {
             return this.beatType;
-        };
-        TimeSignature.prototype.toString = function () {
-            return this.beats + "/" + this.beatType;
-        };
-        return TimeSignature;
-    }());
+        }
+        toString() {
+            return `${this.beats}/${this.beatType}`;
+        }
+    }
     exports.TimeSignature = TimeSignature;
-    var Measure = (function () {
-        function Measure() {
+    class Measure {
+        constructor() {
             this.times = [];
         }
-        Measure.prototype.addTime = function (time) {
+        addTime(time) {
             this.times.push(time);
-        };
-        Measure.prototype.getTimes = function () {
+        }
+        getTimes() {
             return this.times;
-        };
-        Measure.prototype.sumOfTimes = function () {
+        }
+        sumOfTimes() {
             return this.times
-                .map(function (t) { return t.getDuration().value(); })
-                .reduce(function (sum, current) { return sum + current; });
-        };
-        Measure.prototype.toString = function () {
+                .map(t => t.getDuration().value())
+                .reduce((sum, current) => sum + current);
+        }
+        toString() {
             return "  notes " + this.times.join(" ");
-        };
-        Measure.prototype.notEmpty = function () {
+        }
+        notEmpty() {
             return this.times.length > 0;
-        };
-        return Measure;
-    }());
+        }
+    }
     exports.Measure = Measure;
-    var Duration = (function () {
-        function Duration(musicxml, vextab, val) {
+    class Duration {
+        constructor(musicxml, vextab, val) {
             this.musicxml = musicxml;
             this.vextab = vextab;
             this.val = val;
         }
-        Duration.prototype.value = function () {
+        value() {
             return this.val;
-        };
-        Duration.prototype.toString = function () {
+        }
+        toString() {
             return this.vextab.toString();
-        };
-        Duration.WHOLE = new Duration("whole", "w", 4);
-        Duration.HALF_DOT = new Duration(undefined, "hd", 2 + 1);
-        Duration.HALF = new Duration("half", "h", 2);
-        Duration.QUARTER_DOT = new Duration(undefined, "qd", 1 + 1 / 2);
-        Duration.QUARTER = new Duration("quarter", "q", 1);
-        Duration.EIGHTH_DOT = new Duration(undefined, "8d", 1 / 2 + 1 / 4);
-        Duration.EIGHTH = new Duration("eighth", "8", 1 / 2);
-        Duration.T16_DOT = new Duration(undefined, "16d", 1 / 4 + 1 / 8);
-        Duration.T16 = new Duration("16th", "16", 1 / 4);
-        Duration.T32_DOT = new Duration(undefined, "32d", 1 / 8 + 1 / 16);
-        Duration.T32 = new Duration("32nd", "32", 1 / 8);
-        Duration.T64_DOT = new Duration(undefined, "64d", 1 / 16 + 1 / 32);
-        Duration.T64 = new Duration("64th", "64", 1 / 16);
-        Duration.T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
-        Duration.T128 = new Duration("128th", "128", 1 / 32);
-        return Duration;
-    }());
+        }
+    }
+    Duration.WHOLE = new Duration("whole", "w", 4);
+    Duration.HALF_DOT = new Duration(undefined, "hd", 2 + 1);
+    Duration.HALF = new Duration("half", "h", 2);
+    Duration.QUARTER_DOT = new Duration(undefined, "qd", 1 + 1 / 2);
+    Duration.QUARTER = new Duration("quarter", "q", 1);
+    Duration.EIGHTH_DOT = new Duration(undefined, "8d", 1 / 2 + 1 / 4);
+    Duration.EIGHTH = new Duration("eighth", "8", 1 / 2);
+    Duration.T16_DOT = new Duration(undefined, "16d", 1 / 4 + 1 / 8);
+    Duration.T16 = new Duration("16th", "16", 1 / 4);
+    Duration.T32_DOT = new Duration(undefined, "32d", 1 / 8 + 1 / 16);
+    Duration.T32 = new Duration("32nd", "32", 1 / 8);
+    Duration.T64_DOT = new Duration(undefined, "64d", 1 / 16 + 1 / 32);
+    Duration.T64 = new Duration("64th", "64", 1 / 16);
+    Duration.T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
+    Duration.T128 = new Duration("128th", "128", 1 / 32);
     exports.Duration = Duration;
-    var Time = (function () {
-        function Time(duration) {
+    class Time {
+        constructor(duration) {
             this.duration = duration;
         }
-        Time.prototype.toString = function () {
-            return ":" + this.duration + this.representation();
-        };
-        Time.prototype.getDuration = function () {
+        toString() {
+            return `:${this.duration}${this.representation()}`;
+        }
+        getDuration() {
             return this.duration;
-        };
-        Time.prototype.setDuration = function (duration) {
-            this.duration = duration;
-        };
-        return Time;
-    }());
-    exports.Time = Time;
-    var Chord = (function (_super) {
-        __extends(Chord, _super);
-        function Chord() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.notes = [];
-            return _this;
         }
-        Chord.prototype.sortNotes = function () {
-            this.notes.sort(function (a, b) {
+        setDuration(duration) {
+            this.duration = duration;
+        }
+    }
+    exports.Time = Time;
+    class Chord extends Time {
+        constructor() {
+            super(...arguments);
+            this.notes = [];
+        }
+        sortNotes() {
+            this.notes.sort((a, b) => {
                 return b.getString() - a.getString();
             });
-        };
-        Chord.prototype.addNote = function (note) {
+        }
+        addNote(note) {
             if (this.hasNote(note.getString())) {
                 throw new Error("A chord can only have one note on the same string");
             }
             else
                 this.notes.push(note);
-        };
-        Chord.prototype.hasNote = function (string) {
-            for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
-                var note = _a[_i];
+        }
+        hasNote(string) {
+            for (let note of this.notes) {
                 if (note.getString() === string)
                     return true;
             }
             return false;
-        };
-        Chord.prototype.getNotes = function () {
-            return this.notes;
-        };
-        Chord.prototype.notEmpty = function () {
-            return this.notes.length > 0;
-        };
-        Chord.prototype.representation = function () {
-            this.sortNotes();
-            return "(" + this.notes.join(".") + ")";
-        };
-        Chord.prototype.adaptPitch = function (modifier) {
-            for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
-                var note = _a[_i];
-                note.pitch(modifier);
-            }
-        };
-        Chord.prototype.isChord = function () {
-            return true;
-        };
-        return Chord;
-    }(Time));
-    exports.Chord = Chord;
-    var Rest = (function (_super) {
-        __extends(Rest, _super);
-        function Rest() {
-            return _super !== null && _super.apply(this, arguments) || this;
         }
-        Rest.prototype.representation = function () {
+        getNotes() {
+            return this.notes;
+        }
+        notEmpty() {
+            return this.notes.length > 0;
+        }
+        representation() {
+            this.sortNotes();
+            return `(${this.notes.join(".")})`;
+        }
+        adaptPitch(modifier) {
+            for (let note of this.notes) {
+                note.setPitch(modifier);
+            }
+        }
+        isChord() {
+            return true;
+        }
+    }
+    exports.Chord = Chord;
+    class Rest extends Time {
+        representation() {
             return "##";
-        };
-        Rest.prototype.adaptPitch = function (modifier) {
+        }
+        adaptPitch(modifier) {
             // Do nothing
-        };
-        Rest.prototype.isChord = function () {
+        }
+        isChord() {
             return false;
-        };
-        return Rest;
-    }(Time));
+        }
+    }
     exports.Rest = Rest;
-    var Note = (function () {
-        function Note(fret, str) {
+    class Note {
+        constructor(fret, str) {
             this.fret = fret;
             this.str = str;
             if (str <= 0 || str > 6) {
@@ -228,35 +200,42 @@ define(["require", "exports"], function (require, exports) {
             this._pitch = 0;
             this._bend = 0;
         }
-        Note.prototype.toString = function () {
-            var b = '';
+        toString() {
+            let b = '';
             if (this._bend > 0) {
-                b = "b" + (this.fret + this._pitch + this._bend);
+                b = `b${this.fret + this._bend}`;
             }
-            return "" + (this.fret + this._pitch) + b + "/" + this.str;
-        };
-        Note.prototype.getFret = function () {
+            return `${(this.fret)}${b}/${this.str}`;
+        }
+        getFret() {
             return this.fret;
-        };
-        Note.prototype.getString = function () {
+        }
+        getString() {
             return this.str;
-        };
-        Note.prototype.pitch = function (modifier) {
+        }
+        setPitch(modifier) {
             this._pitch = modifier;
-        };
-        Note.prototype.bend = function (amount) {
+        }
+        getPitch() {
+            return this._pitch;
+        }
+        bend(amount) {
             if (amount > 0) {
                 this._bend = amount;
             }
             else {
                 throw new Error("A bend must be strictly positive");
             }
-        };
-        Note.prototype.hasBend = function () {
+        }
+        hasBend() {
             return this._bend > 0;
-        };
-        return Note;
-    }());
+        }
+        hasSharp() {
+            let wrap = vextab.getNoteForFret(this.fret, this.str);
+            let note = wrap[0];
+            return note.indexOf("#") > 0;
+        }
+    }
     exports.Note = Note;
 });
 //# sourceMappingURL=vexmxl.tab.js.map

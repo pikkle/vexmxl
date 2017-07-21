@@ -5,7 +5,7 @@
     "noImplicitAny": true,
     "module": "amd",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "es6",
     "declaration": true,
     "outDir": "out",
     "types": [ "vexflow" ]
