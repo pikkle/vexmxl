@@ -60,7 +60,12 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
             let doc = mxl.parseScore(score);
             console.debug(doc);
             let partName = doc.partList[0].id; // TODO: let the part choice to the user
-            let metronome = doc.measures[0].parts[partName][1].directionTypes[0].metronome;
+            let metronome;
+            for (let obj of doc.measures[0].parts[partName]) {
+                if (obj.hasOwnProperty("directionTypes")) {
+                    metronome = obj.directionTypes[0].metronome;
+                }
+            }
             let times = doc.measures[0].parts[partName][0].times[0];
             let bpm = +metronome.perMinute.data;
             let title = doc.movementTitle;

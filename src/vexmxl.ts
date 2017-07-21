@@ -66,13 +66,16 @@ function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Prom
 		console.debug(doc);
 
 		let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
+		let times: mxl.Time;
 		let metronome: mxl.Metronome;
 		for (let obj of doc.measures[0].parts[partName]) {
 			if (obj.hasOwnProperty("directionTypes")) {
 				metronome = obj.directionTypes[0].metronome;
 			}
+			if (obj.hasOwnProperty("times")) {
+				times = obj.times[0];
+			}
 		}
-		let times: mxl.Time = doc.measures[0].parts[partName][0].times[0];
 		let bpm = +metronome.perMinute.data;
 
 		let title: string = doc.movementTitle;
