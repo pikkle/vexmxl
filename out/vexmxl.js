@@ -55,8 +55,8 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         return img;
     }
     exports.generateImage = generateImage;
-    function parseXML(xml) {
-        return Promise.resolve.then((score) => {
+    function parseXML(xml, displayTab, displayStave) {
+        return Promise.resolve(xml).then((score) => {
             let doc = mxl.parseScore(score);
             console.debug(doc);
             let partName = doc.partList[0].id; // TODO: let the part choice to the user
@@ -121,13 +121,16 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         });
     }
     function parseXMLFromString(xml, displayTab = true, displayStave = true) {
-        return Promise.resolve(xml).then(parseXML);
+        return Promise.resolve(xml).then(str => {
+            return parseXML(str, displayTab, displayStave);
+        });
     }
     exports.parseXMLFromString = parseXMLFromString;
     function parseXMLFromFile(path, displayTab = true, displayStave = true) {
-        return fetch(path)
-            .then((response) => {
+        return fetch(path).then((response) => {
             return response.text();
+        }).then(str => {
+            return parseXML(str, displayTab, displayStave);
         });
     }
     exports.parseXMLFromFile = parseXMLFromFile;
