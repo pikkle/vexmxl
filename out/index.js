@@ -7,4 +7,3 @@ define(["require", "exports", "./vexmxl", "./vexmxl.tab"], function (require, ex
     __export(vexmxl_1);
     __export(vexmxl_tab_1);
 });
-//# sourceMappingURL=index.js.map

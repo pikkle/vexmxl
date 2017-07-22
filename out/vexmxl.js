@@ -33,6 +33,7 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         catch (e) {
             console.error(e);
         }
+        return vt;
     }
     function generateSVG(tab) {
         let div = document.createElement("div");
@@ -145,4 +146,3 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
     }
     exports.parseXMLFromFile = parseXMLFromFile;
 });
-//# sourceMappingURL=vexmxl.js.map

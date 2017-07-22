@@ -238,4 +238,3 @@ define(["require", "exports"], function (require, exports) {
     }
     exports.Note = Note;
 });
-//# sourceMappingURL=vexmxl.tab.js.map
