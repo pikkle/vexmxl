@@ -26,7 +26,9 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         let parsed = tab.toString();
         try {
             vt.parse(parsed);
+            console.debug(vt);
             artist.render(renderer);
+            console.debug(artist);
         }
         catch (e) {
             console.error(e);
@@ -60,13 +62,16 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
             let doc = mxl.parseScore(score);
             console.debug(doc);
             let partName = doc.partList[0].id; // TODO: let the part choice to the user
+            let times;
             let metronome;
             for (let obj of doc.measures[0].parts[partName]) {
                 if (obj.hasOwnProperty("directionTypes")) {
                     metronome = obj.directionTypes[0].metronome;
                 }
+                if (obj.hasOwnProperty("times")) {
+                    times = obj.times[0];
+                }
             }
-            let times = doc.measures[0].parts[partName][0].times[0];
             let bpm = +metronome.perMinute.data;
             let title = doc.movementTitle;
             let time = new vexmxl_tab_1.TimeSignature(+times.beats[0], times.beatTypes[0]);

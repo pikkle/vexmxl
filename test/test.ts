@@ -15,21 +15,20 @@ parseXMLFromFile("../support/Back In Black2.xml", true, true).then(tab => {
 */
 
 let zip = new JSZip();
+
 fetch("http://localhost:8000/uploads/mxl/302e626c-8f53-470d-b057-0e5e8253d6f0.mxl").then((response: Response) => {
 	return response.blob();
 }).then((blob: Blob) => {
 	zip.loadAsync(blob).then(jszip => {
-		jszip.forEach((relativePath, file) => {
-			if (relativePath !== "META-INF/container.xml") {
-				console.log(`Unzipped file ${relativePath}`);
-				file.async("string").then((litteralTablature: string) => {
-					parseXMLFromString(litteralTablature, true).then((tab: Tablature) => {
-						let img = generateImage(tab);
-						document.getElementById("tablature-display").appendChild(img);
-					});
+		jszip.file(/[a-z0-9-]*(\/META-INF\/container.xml)/)[0].async("string").then((containerFile: string) => {
+			let mainFilename = new DOMParser().parseFromString(containerFile, "application/xml").getElementsByTagName("rootfile")[0].getAttribute("full-path");
+			let regexp = new RegExp(`[a-z0-9-]*(\/${mainFilename})`);
+			jszip.file(regexp)[0].async("string").then(musicxmlString => {
+				parseXMLFromString(musicxmlString, true).then((tab: Tablature) => {
+					let img = generateImage(tab);
+					document.getElementById("display").appendChild(img);
 				});
-			}
-		})
+			});
+		});
 	});
 });
-

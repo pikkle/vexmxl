@@ -22,7 +22,7 @@ let timeMap: { [key: number]: Duration } = {
 	0.0625: Duration.T64
 };
 
-function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): void {
+function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): VexTab {
 	let artist: Artist = new Artist(0, 0, tab.width());
 	let vt: VexTab = new VexTab(artist);
 	let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
@@ -30,10 +30,14 @@ function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): vo
 
 	try {
 		vt.parse(parsed);
+		console.debug(vt);
 		artist.render(renderer);
+		console.debug(artist);
 	} catch (e) {
 		console.error(e);
 	}
+
+	return vt;
 }
 
 export function generateSVG(tab: Tablature): SVGElement {
