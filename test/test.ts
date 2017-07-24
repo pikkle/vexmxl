@@ -16,7 +16,7 @@ parseXMLFromFile("../support/Back In Black2.xml", true, true).then(tab => {
 
 let zip = new JSZip();
 
-fetch("http://localhost:8000/uploads/mxl/302e626c-8f53-470d-b057-0e5e8253d6f0.mxl").then((response: Response) => {
+fetch("http://localhost:8000/uploads/mxl/b9a20256-00e7-42ca-8f27-e01ccf5d55ce.mxl").then((response: Response) => {
 	return response.blob();
 }).then((blob: Blob) => {
 	zip.loadAsync(blob).then(jszip => {

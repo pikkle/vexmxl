@@ -100,6 +100,10 @@ function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Prom
 				} else if (elem._class === "Note") {
 					let note = elem as mxl.Note;
 					let duration = timeMap[1 / divisions * note.duration];
+					if (! duration) {
+						console.error(`Unable to parse the duration of the note. Duration input: ${note.duration}, divisions: ${divisions}`);
+						continue;
+					}
 					if (note.rest) {
 						if (chord && chord.notEmpty()) {
 							measure.addTime(chord);
@@ -109,7 +113,6 @@ function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Prom
 
 					} else if (note.pitch) {
 						let tech = note.notations[0].technicals[0];
-
 						if (note.chord) {
 							if (!chord) throw new ParseError("Chord element has not been initialized properly");
 						} else {
@@ -124,6 +127,7 @@ function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Prom
 							vNote.bend(+tech.bend.bendAlter);
 						}
 						chord.addNote(vNote);
+
 					} else {
 						throw new ParseError("note has not been recognized");
 					}
