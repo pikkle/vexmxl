@@ -67,9 +67,9 @@ export function generateImage(tab: Tablature): HTMLImageElement {
 function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Promise<Tablature> {
 	return Promise.resolve(xml).then((score: string) => {
 		let doc: mxl.ScoreTimewise = mxl.parseScore(score);
-		console.debug(doc);
 
-		let partName: string = (doc.partList[0] as mxl.ScorePart).id; // TODO: let the part choice to the user
+		// @Future let the user choose the part to play (and detect instrument)
+		let partName: string = (doc.partList[0] as mxl.ScorePart).id;
 		let times: mxl.Time;
 		let metronome: mxl.Metronome;
 		for (let obj of doc.measures[0].parts[partName]) {

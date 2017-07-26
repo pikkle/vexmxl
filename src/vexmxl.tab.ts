@@ -103,7 +103,7 @@ export class Measure implements Item {
     }
 }
 
-export class Duration {
+export class Duration implements Item {
     public static WHOLE = new Duration("whole", "w", 4);
     public static HALF_DOT = new Duration(undefined, "hd", 2 + 1);
     public static HALF = new Duration("half", "h", 2);
@@ -120,8 +120,7 @@ export class Duration {
     public static T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
     public static T128 = new Duration("128th", "128", 1 / 32);
 
-    private constructor(private musicxml: string, private vextab: string, private val: number) {
-    }
+    private constructor(private musicxml: string, private vextab: string, private val: number) {}
 
     public value(): number {
         return this.val;
