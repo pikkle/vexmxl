@@ -36,7 +36,7 @@ export declare class Measure implements Item {
     toString(): string;
     notEmpty(): boolean;
 }
-export declare class Duration {
+export declare class Duration implements Item {
     private musicxml;
     private vextab;
     private val;
@@ -55,7 +55,7 @@ export declare class Duration {
     static T64: Duration;
     static T128_DOT: Duration;
     static T128: Duration;
-    private constructor();
+    private constructor(musicxml, vextab, val);
     value(): number;
     toString(): string;
 }

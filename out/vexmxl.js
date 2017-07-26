@@ -17,7 +17,7 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         0.1875: vexmxl_tab_1.Duration.T32_DOT,
         0.125: vexmxl_tab_1.Duration.T32,
         0.09375: vexmxl_tab_1.Duration.T64_DOT,
-        0.0625: vexmxl_tab_1.Duration.T64
+        0.0625: vexmxl_tab_1.Duration.T64 // T32 / 2
     };
     function displayTablature(tab, div, canvas) {
         let artist = new Artist(0, 0, tab.width());
@@ -26,43 +26,42 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
         let parsed = tab.toString();
         try {
             vt.parse(parsed);
-            console.debug(vt);
             artist.render(renderer);
-            console.debug(artist);
         }
         catch (e) {
             console.error(e);
         }
         return vt;
     }
+    exports.displayTablature = displayTablature;
     function generateSVG(tab) {
         let div = document.createElement("div");
-        displayTablature(tab, div, false);
-        return div.children[0];
+        let vt = displayTablature(tab, div, false);
+        return { svg: div.children[0], vt: vt };
     }
     exports.generateSVG = generateSVG;
     function generateCanvas(tab) {
         let canvas = document.createElement("canvas");
         console.warn("Canvas size is limited, e.g. Chrome's canvas can only be 32,767x32,767 pixels. " +
             "If it exceeds, nothing will be displayed.");
-        displayTablature(tab, canvas, true);
-        return canvas;
+        let vt = displayTablature(tab, canvas, true);
+        return { canvas: canvas, vt: vt };
     }
     exports.generateCanvas = generateCanvas;
     function generateImage(tab) {
         let svg = generateSVG(tab); // uses SVG rendering instead of canvas because of size limitations
-        let svgData = new XMLSerializer().serializeToString(svg);
+        let svgData = new XMLSerializer().serializeToString(svg.svg);
         let data = "data:image/svg+xml;base64," + btoa(svgData);
         let img = document.createElement("img");
         img.setAttribute('src', data);
-        return img;
+        return { img: img, vt: svg.vt };
     }
     exports.generateImage = generateImage;
     function parseXML(xml, displayTab, displayStave) {
         return Promise.resolve(xml).then((score) => {
             let doc = mxl.parseScore(score);
-            console.debug(doc);
-            let partName = doc.partList[0].id; // TODO: let the part choice to the user
+            // @Future let the user choose the part to play (and detect instrument)
+            let partName = doc.partList[0].id;
             let times;
             let metronome;
             for (let obj of doc.measures[0].parts[partName]) {
@@ -91,6 +90,10 @@ define(["require", "exports", "musicxml-interfaces", "./vexmxl.tab", "vexflow"],
                     else if (elem._class === "Note") {
                         let note = elem;
                         let duration = timeMap[1 / divisions * note.duration];
+                        if (!duration) {
+                            console.error(`Unable to parse the duration of the note. Duration input: ${note.duration}, divisions: ${divisions}`);
+                            continue;
+                        }
                         if (note.rest) {
                             if (chord && chord.notEmpty()) {
                                 measure.addTime(chord);

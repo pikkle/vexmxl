@@ -7,22 +7,22 @@ class ParseError extends Error {
 }
 
 let timeMap: { [key: number]: Duration } = {
-	4: Duration.WHOLE,
-	3: Duration.HALF_DOT,
-	2: Duration.HALF,
-	1.5: Duration.QUARTER_DOT,
+	4: Duration.WHOLE, // = HALF * 2
+	3: Duration.HALF_DOT, // = HALF + QUARTER
+	2: Duration.HALF, // = QUARTER * 2
+	1.5: Duration.QUARTER_DOT, // = QUARTER + EIGHTH
 	1: Duration.QUARTER,
-	0.75: Duration.EIGHTH_DOT,
-	0.5: Duration.EIGHTH,
-	0.375: Duration.T16_DOT,
-	0.25: Duration.T16,
-	0.1875: Duration.T32_DOT,
-	0.125: Duration.T32,
-	0.09375: Duration.T64_DOT,
-	0.0625: Duration.T64
+	0.75: Duration.EIGHTH_DOT, // = EIGHTH + T16
+	0.5: Duration.EIGHTH, // = QUARTER / 2
+	0.375: Duration.T16_DOT, // = T16 + T32
+	0.25: Duration.T16, // = EIGHTH / 2
+	0.1875: Duration.T32_DOT, // = T32 + T64
+	0.125: Duration.T32, // = T16 / 2
+	0.09375: Duration.T64_DOT, // = T64 + T64 / 2
+	0.0625: Duration.T64 // T32 / 2
 };
 
-function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): VexTab {
+export function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): VexTab {
 	let artist: Artist = new Artist(0, 0, tab.width());
 	let vt: VexTab = new VexTab(artist);
 	let renderer: Renderer = new Renderer(div, canvas ? Renderer.Backends.CANVAS : Renderer.Backends.SVG);
@@ -30,9 +30,7 @@ function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): Ve
 
 	try {
 		vt.parse(parsed);
-		console.debug(vt);
 		artist.render(renderer);
-		console.debug(artist);
 	} catch (e) {
 		console.error(e);
 	}
@@ -40,28 +38,28 @@ function displayTablature(tab: Tablature, div: HTMLElement, canvas: boolean): Ve
 	return vt;
 }
 
-export function generateSVG(tab: Tablature): SVGElement {
+export function generateSVG(tab: Tablature): {svg: SVGElement, vt: VexTab} {
 	let div = document.createElement("div");
-	displayTablature(tab, div, false);
-	return div.children[0] as SVGElement;
+	let vt = displayTablature(tab, div, false);
+	return {svg: div.children[0] as SVGElement, vt: vt};
 }
 
-export function generateCanvas(tab: Tablature): HTMLCanvasElement {
+export function generateCanvas(tab: Tablature): {canvas: HTMLCanvasElement, vt: VexTab} {
 	let canvas = document.createElement("canvas");
 	console.warn("Canvas size is limited, e.g. Chrome's canvas can only be 32,767x32,767 pixels. " +
 		"If it exceeds, nothing will be displayed.");
-	displayTablature(tab, canvas, true);
-	return canvas;
+	let vt = displayTablature(tab, canvas, true);
+	return {canvas: canvas, vt: vt};
 }
 
-export function generateImage(tab: Tablature): HTMLImageElement {
+export function generateImage(tab: Tablature): {img: HTMLImageElement, vt: VexTab} {
 	let svg = generateSVG(tab); // uses SVG rendering instead of canvas because of size limitations
-	let svgData = new XMLSerializer().serializeToString(svg);
+	let svgData = new XMLSerializer().serializeToString(svg.svg);
 	let data = "data:image/svg+xml;base64," + btoa(svgData);
 	let img = document.createElement("img");
 
 	img.setAttribute('src', data);
-	return img;
+	return {img: img, vt: svg.vt};
 }
 
 function parseXML(xml: string, displayTab: boolean, displayStave: boolean): Promise<Tablature> {
