@@ -38,7 +38,7 @@ export declare class Measure implements Item {
 }
 export declare class Duration implements Item {
     private musicxml;
-    private vextab;
+    vextab: string;
     private val;
     static WHOLE: Duration;
     static HALF_DOT: Duration;
@@ -55,12 +55,17 @@ export declare class Duration implements Item {
     static T64: Duration;
     static T128_DOT: Duration;
     static T128: Duration;
-    private static list;
+    static list: Duration[];
     private constructor(musicxml, vextab, val);
     value(): number;
     toString(): string;
-    static fromVextab(vt: string): Duration;
 }
+/**
+ * Finds a Vexmxl duration based on the Vextab notation
+ * @param vt The vextab notation ("w", "h", "q", "8", etc.)
+ * @returns {undefined|Duration}
+ */
+export declare function fromVextab(vt: string): Duration;
 export declare abstract class Time implements Item {
     private duration;
     constructor(duration: Duration);

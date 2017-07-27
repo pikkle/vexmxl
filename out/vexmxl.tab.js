@@ -99,9 +99,6 @@ define(["require", "exports"], function (require, exports) {
         toString() {
             return this.vextab.toString();
         }
-        static fromVextab(vt) {
-            return Duration.list.find((value, index, obj) => value.vextab === vt);
-        }
     }
     Duration.WHOLE = new Duration("whole", "w", 4);
     Duration.HALF_DOT = new Duration(undefined, "hd", 2 + 1);
@@ -124,6 +121,15 @@ define(["require", "exports"], function (require, exports) {
         Duration.T32, Duration.T64_DOT, Duration.T64, Duration.T128_DOT, Duration.T128
     ];
     exports.Duration = Duration;
+    /**
+     * Finds a Vexmxl duration based on the Vextab notation
+     * @param vt The vextab notation ("w", "h", "q", "8", etc.)
+     * @returns {undefined|Duration}
+     */
+    function fromVextab(vt) {
+        return Duration.list.find((value, index, obj) => value.vextab === vt);
+    }
+    exports.fromVextab = fromVextab;
     class Time {
         constructor(duration) {
             this.duration = duration;
