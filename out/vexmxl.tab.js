@@ -99,6 +99,9 @@ define(["require", "exports"], function (require, exports) {
         toString() {
             return this.vextab.toString();
         }
+        static fromVextab(vt) {
+            return Duration.list.find((value, index, obj) => value.vextab === vt);
+        }
     }
     Duration.WHOLE = new Duration("whole", "w", 4);
     Duration.HALF_DOT = new Duration(undefined, "hd", 2 + 1);
@@ -115,6 +118,11 @@ define(["require", "exports"], function (require, exports) {
     Duration.T64 = new Duration("64th", "64", 1 / 16);
     Duration.T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
     Duration.T128 = new Duration("128th", "128", 1 / 32);
+    Duration.list = [
+        Duration.WHOLE, Duration.HALF_DOT, Duration.HALF, Duration.QUARTER_DOT, Duration.QUARTER,
+        Duration.EIGHTH_DOT, Duration.EIGHTH, Duration.T16_DOT, Duration.T16, Duration.T32_DOT,
+        Duration.T32, Duration.T64_DOT, Duration.T64, Duration.T128_DOT, Duration.T128
+    ];
     exports.Duration = Duration;
     class Time {
         constructor(duration) {

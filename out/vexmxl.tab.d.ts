@@ -55,9 +55,11 @@ export declare class Duration implements Item {
     static T64: Duration;
     static T128_DOT: Duration;
     static T128: Duration;
+    private static list;
     private constructor(musicxml, vextab, val);
     value(): number;
     toString(): string;
+    static fromVextab(vt: string): Duration;
 }
 export declare abstract class Time implements Item {
     private duration;

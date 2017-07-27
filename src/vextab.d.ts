@@ -5,6 +5,7 @@
 
 import GhostNote = Vex.Flow.GhostNote;
 import TabNote = Vex.Flow.TabNote;
+import BarNote = Vex.Flow.BarNote;
 declare interface ArtistOption {
 	font_face?: string;
 	font_size?: number;
@@ -16,7 +17,7 @@ declare interface ArtistOption {
 }
 
 declare class Stave {
-	tab_notes: (GhostNote | TabNote)[]
+	tab_notes: (GhostNote | TabNote | BarNote)[]
 }
 
 declare class Artist {

@@ -119,7 +119,11 @@ export class Duration implements Item {
     public static T64 = new Duration("64th", "64", 1 / 16);
     public static T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
     public static T128 = new Duration("128th", "128", 1 / 32);
-
+    private static list: Duration[] = [
+        Duration.WHOLE, Duration.HALF_DOT, Duration.HALF, Duration.QUARTER_DOT, Duration.QUARTER,
+        Duration.EIGHTH_DOT, Duration.EIGHTH, Duration.T16_DOT, Duration.T16, Duration.T32_DOT,
+        Duration.T32, Duration.T64_DOT, Duration.T64, Duration.T128_DOT, Duration.T128
+    ];
     private constructor(private musicxml: string, private vextab: string, private val: number) {}
 
     public value(): number {
@@ -128,6 +132,10 @@ export class Duration implements Item {
 
     public toString(): string {
         return this.vextab.toString();
+    }
+
+    public static fromVextab(vt: string): Duration {
+        return Duration.list.find((value, index, obj) => value.vextab === vt);
     }
 
 }

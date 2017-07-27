@@ -1,6 +1,6 @@
 {
   "name": "vexmxl",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "description": "MusicXML binding for VexFlow",
   "repository": "https://github.com/pikkle/vexmxl",
   "main": "out/vexmxl.js",
