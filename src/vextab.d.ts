@@ -1,7 +1,6 @@
 // Type definitions for VexTab v0.0.1
 // Project: VexTab from http://vexflow.com
 // Definitions by: Loïc Serafin <https://github.com/pikkle>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 import GhostNote = Vex.Flow.GhostNote;
 import TabNote = Vex.Flow.TabNote;
