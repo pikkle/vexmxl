@@ -1,10 +1,21 @@
+/**
+ * Vexmxl representable interface.
+ * All vexmxl element must have a vextab representation
+ */
 export interface Item {
-    toString(): string;
+	/**
+     * Gives the vextab representation of the item
+	 * @returns {string} vextab representation
+	 */
+	toVextab(): string;
 }
 
 const MEASURE_LENGTH: number = 400;
 let vextab = new Artist(0, 0, 1);
 
+/**
+ * Top class that represents the whole tablature.
+ */
 export class Tablature implements Item {
     private measures: Measure[] = [];
 
@@ -13,7 +24,7 @@ export class Tablature implements Item {
                 private bpm: number,
                 private displayTablature: boolean = true,
                 private displayStave: boolean = true,
-                private _scale: number = 1.0) {
+                private scale: number = 1.0) {
     }
 
     public getTitle(): string {
@@ -36,8 +47,8 @@ export class Tablature implements Item {
         return this.measures;
     }
 
-    public scale(ratio: number) {
-        this._scale = ratio;
+    public setScale(ratio: number) {
+        this.scale = ratio;
     }
 
     public width(): number {
@@ -48,19 +59,26 @@ export class Tablature implements Item {
         return this.measures.map(m => m.sumOfTimes());
     }
 
-    public toString(): string {
+    public toVextab(): string {
         this.measures.map(m => {
             if (m.sumOfTimes() != this.time.getBeatType())
                 console.warn("Measure does not fulfill the time signature !");
         });
-        return `options width=${this.width()} scale=${this._scale}\n` +
-            `tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time}\n` +
-            this.measures.join("|\n");
+        return `options width=${this.width()} scale=${this.scale}\n` +
+            `tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time.toVextab()}\n` +
+            this.measures.map(m => m.toVextab()).join("|\n");
     }
 
 }
 
+/**
+ * Infos on the tempo of the song
+ */
 export class TimeSignature implements Item {
+	/**
+	 * @param {number} beats the numerator on the music sheet
+	 * @param {number} beatType the denominator on the music sheet
+	 */
     constructor(private beats: number, private beatType: number) {
     }
 
@@ -72,11 +90,15 @@ export class TimeSignature implements Item {
         return this.beatType;
     }
 
-    public toString(): string {
+    public toVextab(): string {
         return `${this.beats}/${this.beatType}`;
     }
 }
 
+/**
+ * A measure contains a certain amount of times.
+ * This amount is determined by the time signature.
+ */
 export class Measure implements Item {
     private times: Time[] = [];
 
@@ -88,14 +110,18 @@ export class Measure implements Item {
         return this.times;
     }
 
-    public sumOfTimes(): number {
+	/**
+	 * Calculates the cumulated duration of contained times
+	 * @returns {number}
+	 */
+	public sumOfTimes(): number {
         return this.times
             .map(t => t.getDuration().value())
             .reduce((sum, current) => sum + current);
     }
 
-    public toString(): string {
-        return "  notes " + this.times.join(" ");
+    public toVextab(): string {
+        return "  notes " + this.times.map(t => t.toVextab()).join(" ");
     }
 
     public notEmpty(): boolean {
@@ -103,7 +129,10 @@ export class Measure implements Item {
     }
 }
 
-export class Duration {
+/**
+ * A musical duration
+ */
+export class Duration implements Item {
     public static WHOLE = new Duration("whole", "w", 4);
     public static HALF_DOT = new Duration(undefined, "hd", 2 + 1);
     public static HALF = new Duration("half", "h", 2);
@@ -119,26 +148,40 @@ export class Duration {
     public static T64 = new Duration("64th", "64", 1 / 16);
     public static T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
     public static T128 = new Duration("128th", "128", 1 / 32);
-
-    private constructor(private musicxml: string, private vextab: string, private val: number) {
-    }
+    public static list: Duration[] = [
+        Duration.WHOLE, Duration.HALF_DOT, Duration.HALF, Duration.QUARTER_DOT, Duration.QUARTER,
+        Duration.EIGHTH_DOT, Duration.EIGHTH, Duration.T16_DOT, Duration.T16, Duration.T32_DOT,
+        Duration.T32, Duration.T64_DOT, Duration.T64, Duration.T128_DOT, Duration.T128
+    ];
+    private constructor(private musicxml: string, public vextab: string, private val: number) {}
 
     public value(): number {
         return this.val;
     }
 
-    public toString(): string {
+    public toVextab(): string {
         return this.vextab.toString();
     }
 
+	/**
+	 * Finds a Vexmxl duration based on the Vextab notation
+	 * @param vt The vextab notation ("w", "h", "q", "8", etc.)
+	 * @returns {undefined|Duration}
+	 */
+	public static fromVextab(vt: string): Duration {
+		return Duration.list.filter((value, index, obj) => value.vextab === vt)[0];
+	}
 }
 
+/**
+ * A time is a music item (either a silence, a note, or a chord)
+ */
 export abstract class Time implements Item {
     constructor(private duration: Duration) {
     }
 
-    public toString(): string {
-        return `:${this.duration}${this.representation()}`;
+    public toVextab(): string {
+        return `:${this.duration.toVextab()}${this.representation()}`;
     }
 
     public getDuration(): Duration {
@@ -149,17 +192,28 @@ export abstract class Time implements Item {
         this.duration = duration;
     }
 
-    public abstract isChord(): boolean; // Kind of dirty, but a nice compromise on broken instanceof of Typescript on imported type definitions
+    // Kind of dirty, but a nice compromise on broken instanceof of Typescript on imported type definitions
+    public abstract isChord(): boolean;
 
     public abstract adaptPitch(modifier: number): void;
 
-    protected abstract representation(): string;
+	/**
+	 * Times representation to be used in the toVextab() call
+	 * @returns {string}
+	 */
+	protected abstract representation(): string;
 }
 
+/**
+ * A chord is a set of notes.
+ */
 export class Chord extends Time {
     private notes: Note[] = [];
 
-    private sortNotes(): void {
+	/**
+	 * Vextab needs the notes to be sorted on strings for correct displaying
+	 */
+	private sortNotes(): void {
         this.notes.sort((a, b) => {
             return b.getString() - a.getString()
         });
@@ -188,7 +242,7 @@ export class Chord extends Time {
 
     protected representation(): string {
         this.sortNotes();
-        return `(${this.notes.join(".")})`;
+        return `(${this.notes.map(n => n.toVextab()).join(".")})`;
     }
 
     public adaptPitch(modifier: number): void {
@@ -203,6 +257,9 @@ export class Chord extends Time {
 
 }
 
+/**
+ * A rest is a time silenced
+ */
 export class Rest extends Time {
 
 	protected representation(): string {
@@ -218,6 +275,9 @@ export class Rest extends Time {
 	}
 }
 
+/**
+ * A note corresponds to a string pinched to a certain fret
+ */
 export class Note implements Item {
     private _pitch: number;
     private _bend: number;
@@ -233,7 +293,7 @@ export class Note implements Item {
         this._bend = 0;
     }
 
-    public toString(): string {
+    public toVextab(): string {
         let b = '';
         if (this._bend > 0) {
             b = `b${this.fret + this._bend}`;
@@ -269,7 +329,11 @@ export class Note implements Item {
         return this._bend > 0;
     }
 
-    public hasSharp(): boolean {
+	/**
+	 * Gives if the note is a sharp/bemol note
+	 * @returns {boolean}
+	 */
+	public hasSharp(): boolean {
 	    let wrap: any[] = vextab.getNoteForFret(this.fret, this.str);
 	    let note: string = wrap[0];
         return note.indexOf("#") > 0;

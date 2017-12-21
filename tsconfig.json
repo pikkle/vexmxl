@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "sourceMap": true,
+    "sourceMap": false,
     "noImplicitThis": true,
     "noImplicitAny": true,
     "module": "amd",
@@ -8,13 +8,12 @@
     "target": "es6",
     "declaration": true,
     "outDir": "out",
-    "types": [ "vexflow" ]
+    "types": [ "vexflow", "intern"]
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
-    "src/tests",
     "node_modules"
   ]
 }

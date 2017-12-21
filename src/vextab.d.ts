@@ -1,8 +1,10 @@
 // Type definitions for VexTab v0.0.1
 // Project: VexTab from http://vexflow.com
 // Definitions by: Loïc Serafin <https://github.com/pikkle>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
+import GhostNote = Vex.Flow.GhostNote;
+import TabNote = Vex.Flow.TabNote;
+import BarNote = Vex.Flow.BarNote;
 declare interface ArtistOption {
 	font_face?: string;
 	font_size?: number;
@@ -13,6 +15,10 @@ declare interface ArtistOption {
 	scale?: number;
 }
 
+declare class Stave {
+	tab_notes: (GhostNote | TabNote | BarNote)[]
+}
+
 declare class Artist {
 	public NOLOGO: boolean;
 	constructor(x: number, y: number, width: number, options?: ArtistOption);
@@ -20,7 +26,7 @@ declare class Artist {
 	public draw(renderer: Vex.Flow.Renderer): void;
 	public getNoteForFret(fret: any, string: any): any;
 	public parseBool(str: string): boolean;
-
+	public staves: Stave[];
 
 }
 

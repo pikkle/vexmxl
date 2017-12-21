@@ -3,14 +3,17 @@ define(["require", "exports"], function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const MEASURE_LENGTH = 400;
     let vextab = new Artist(0, 0, 1);
+    /**
+     * Top class that represents the whole tablature.
+     */
     class Tablature {
-        constructor(title, time, bpm, displayTablature = true, displayStave = true, _scale = 1.0) {
+        constructor(title, time, bpm, displayTablature = true, displayStave = true, scale = 1.0) {
             this.title = title;
             this.time = time;
             this.bpm = bpm;
             this.displayTablature = displayTablature;
             this.displayStave = displayStave;
-            this._scale = _scale;
+            this.scale = scale;
             this.measures = [];
         }
         getTitle() {
@@ -28,8 +31,8 @@ define(["require", "exports"], function (require, exports) {
         getMeasures() {
             return this.measures;
         }
-        scale(ratio) {
-            this._scale = ratio;
+        setScale(ratio) {
+            this.scale = ratio;
         }
         width() {
             return MEASURE_LENGTH * this.measures.length;
@@ -37,18 +40,25 @@ define(["require", "exports"], function (require, exports) {
         getMeasureLengths() {
             return this.measures.map(m => m.sumOfTimes());
         }
-        toString() {
+        toVextab() {
             this.measures.map(m => {
                 if (m.sumOfTimes() != this.time.getBeatType())
                     console.warn("Measure does not fulfill the time signature !");
             });
-            return `options width=${this.width()} scale=${this._scale}\n` +
+            return `options width=${this.width()} scale=${this.scale}\n` +
                 `tabstave notation=${this.displayStave} tablature=${this.displayTablature}\n time=${this.time}\n` +
-                this.measures.join("|\n");
+                this.measures.map(m => m.toVextab()).join("|\n");
         }
     }
     exports.Tablature = Tablature;
+    /**
+     * Infos on the tempo of the song
+     */
     class TimeSignature {
+        /**
+         * @param {number} beats the numerator on the music sheet
+         * @param {number} beatType the denominator on the music sheet
+         */
         constructor(beats, beatType) {
             this.beats = beats;
             this.beatType = beatType;
@@ -59,11 +69,15 @@ define(["require", "exports"], function (require, exports) {
         getBeatType() {
             return this.beatType;
         }
-        toString() {
+        toVextab() {
             return `${this.beats}/${this.beatType}`;
         }
     }
     exports.TimeSignature = TimeSignature;
+    /**
+     * A measure contains a certain amount of times.
+     * This amount is determined by the time signature.
+     */
     class Measure {
         constructor() {
             this.times = [];
@@ -74,19 +88,26 @@ define(["require", "exports"], function (require, exports) {
         getTimes() {
             return this.times;
         }
+        /**
+         * Calculates the cumulated duration of contained times
+         * @returns {number}
+         */
         sumOfTimes() {
             return this.times
                 .map(t => t.getDuration().value())
                 .reduce((sum, current) => sum + current);
         }
-        toString() {
-            return "  notes " + this.times.join(" ");
+        toVextab() {
+            return "  notes " + this.times.map(t => t.toVextab()).join(" ");
         }
         notEmpty() {
             return this.times.length > 0;
         }
     }
     exports.Measure = Measure;
+    /**
+     * A musical duration
+     */
     class Duration {
         constructor(musicxml, vextab, val) {
             this.musicxml = musicxml;
@@ -96,8 +117,16 @@ define(["require", "exports"], function (require, exports) {
         value() {
             return this.val;
         }
-        toString() {
+        toVextab() {
             return this.vextab.toString();
+        }
+        /**
+         * Finds a Vexmxl duration based on the Vextab notation
+         * @param vt The vextab notation ("w", "h", "q", "8", etc.)
+         * @returns {undefined|Duration}
+         */
+        static fromVextab(vt) {
+            return Duration.list.filter((value, index, obj) => value.vextab === vt)[0];
         }
     }
     Duration.WHOLE = new Duration("whole", "w", 4);
@@ -115,12 +144,20 @@ define(["require", "exports"], function (require, exports) {
     Duration.T64 = new Duration("64th", "64", 1 / 16);
     Duration.T128_DOT = new Duration(undefined, "128d", 1 / 32 + 1 / 64);
     Duration.T128 = new Duration("128th", "128", 1 / 32);
+    Duration.list = [
+        Duration.WHOLE, Duration.HALF_DOT, Duration.HALF, Duration.QUARTER_DOT, Duration.QUARTER,
+        Duration.EIGHTH_DOT, Duration.EIGHTH, Duration.T16_DOT, Duration.T16, Duration.T32_DOT,
+        Duration.T32, Duration.T64_DOT, Duration.T64, Duration.T128_DOT, Duration.T128
+    ];
     exports.Duration = Duration;
+    /**
+     * A time is a music item (either a silence, a note, or a chord)
+     */
     class Time {
         constructor(duration) {
             this.duration = duration;
         }
-        toString() {
+        toVextab() {
             return `:${this.duration}${this.representation()}`;
         }
         getDuration() {
@@ -131,11 +168,17 @@ define(["require", "exports"], function (require, exports) {
         }
     }
     exports.Time = Time;
+    /**
+     * A chord is a set of notes.
+     */
     class Chord extends Time {
         constructor() {
             super(...arguments);
             this.notes = [];
         }
+        /**
+         * Vextab needs the notes to be sorted on strings for correct displaying
+         */
         sortNotes() {
             this.notes.sort((a, b) => {
                 return b.getString() - a.getString();
@@ -163,7 +206,7 @@ define(["require", "exports"], function (require, exports) {
         }
         representation() {
             this.sortNotes();
-            return `(${this.notes.join(".")})`;
+            return `(${this.notes.map(n => n.toVextab()).join(".")})`;
         }
         adaptPitch(modifier) {
             for (let note of this.notes) {
@@ -175,6 +218,9 @@ define(["require", "exports"], function (require, exports) {
         }
     }
     exports.Chord = Chord;
+    /**
+     * A rest is a time silenced
+     */
     class Rest extends Time {
         representation() {
             return "##";
@@ -187,6 +233,9 @@ define(["require", "exports"], function (require, exports) {
         }
     }
     exports.Rest = Rest;
+    /**
+     * A note corresponds to a string pinched to a certain fret
+     */
     class Note {
         constructor(fret, str) {
             this.fret = fret;
@@ -200,7 +249,7 @@ define(["require", "exports"], function (require, exports) {
             this._pitch = 0;
             this._bend = 0;
         }
-        toString() {
+        toVextab() {
             let b = '';
             if (this._bend > 0) {
                 b = `b${this.fret + this._bend}`;
@@ -230,6 +279,10 @@ define(["require", "exports"], function (require, exports) {
         hasBend() {
             return this._bend > 0;
         }
+        /**
+         * Gives if the note is a sharp/bemol note
+         * @returns {boolean}
+         */
         hasSharp() {
             let wrap = vextab.getNoteForFret(this.fret, this.str);
             let note = wrap[0];
@@ -238,4 +291,3 @@ define(["require", "exports"], function (require, exports) {
     }
     exports.Note = Note;
 });
-//# sourceMappingURL=vexmxl.tab.js.map

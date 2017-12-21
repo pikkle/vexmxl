@@ -1,13 +1,14 @@
 {
   "name": "vexmxl",
-  "version": "2.1.1",
+  "version": "2.1.9",
   "description": "MusicXML binding for VexFlow",
   "repository": "https://github.com/pikkle/vexmxl",
   "main": "out/vexmxl.js",
   "typings": "out/index.d.ts",
   "scripts": {
     "compile": "rimraf out && tsc",
-    "prepublish": "npm run compile"
+    "prepublish": "npm run compile",
+    "test": "intern"
   },
   "author": "Pikkle",
   "license": "ISC",
@@ -22,10 +23,10 @@
     "vextab": "^2.0.13"
   },
   "devDependencies": {
-    "@types/vexflow": "^1.2.29",
-    "intern": "^3.4.5",
+    "@types/jszip": "0.0.33",
+    "@types/vexflow": "^1.2.30",
     "source-map-loader": "^0.2.1",
     "ts-loader": "^2.2.0",
-    "typescript": "^2.4.1"
+    "typescript": "^2.4.2"
   }
 }
