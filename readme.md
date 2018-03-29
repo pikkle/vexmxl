@@ -1,3 +1,5 @@
+This project is no longer maintained. I suggest looking into https://github.com/opensheetmusicdisplay/opensheetmusicdisplay which should implement tablatures rendering soon.
+
 # vexmxl
 
 Vexmxl has for purpose to use VexTab (by extension VexFlow) alongside MusicXML files to display tablatures and music sheets.
